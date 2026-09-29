@@ -213,6 +213,51 @@ class DayOneVideo(BaseModel):
         extra = "allow"
 
 
+class DayOneAudio(BaseModel):
+    """
+    Day One audio recording metadata.
+
+    Day One stores recordings as audios/<md5>.<format> (usually m4a) and
+    references them from richText as embeddedObjects of type "audio".
+    """
+    identifier: str = Field(..., alias="identifier", min_length=1, max_length=100)
+    md5: Optional[str] = Field(None, alias="md5", min_length=32, max_length=32)
+    format: Optional[str] = Field(None, alias="format", max_length=50)
+    title: Optional[str] = Field(None, alias="title", max_length=500)
+    date: Optional[datetime] = Field(None, alias="date")
+    order_in_entry: Optional[int] = Field(None, alias="orderInEntry", ge=0)
+    favorite: Optional[bool] = Field(None, alias="favorite")
+    duration: Optional[float] = Field(None, alias="duration", ge=0)
+    file_size: Optional[int] = Field(None, alias="fileSize", ge=0)
+    audio_channels: Optional[str] = Field(None, alias="audioChannels", max_length=50)
+    sample_rate: Optional[str] = Field(None, alias="sampleRate", max_length=50)
+    time_zone_name: Optional[str] = Field(None, alias="timeZoneName", max_length=100)
+
+    @field_validator("md5")
+    @classmethod
+    def validate_md5(cls, v: Optional[str]) -> Optional[str]:
+        """Validate MD5 hash format (32 hex chars)."""
+        if v is not None and not all(c in '0123456789abcdefABCDEF' for c in v):
+            raise ValueError("MD5 must be a valid hex string")
+        return v.lower() if v else v
+
+    @field_validator("date", mode="before")
+    @classmethod
+    def normalize_date(cls, v: Optional[Any]) -> Optional[Any]:
+        return _parse_dayone_datetime(v)
+
+    @field_validator("date")
+    @classmethod
+    def validate_date_range(cls, v: Optional[datetime]) -> Optional[datetime]:
+        if v is None:
+            return v
+        return _validate_dayone_datetime_range(v, "audio.date")
+
+    class Config:
+        populate_by_name = True
+        extra = "allow"
+
+
 class DayOneEntry(BaseModel):
     """
     Day One journal entry.
@@ -244,6 +289,7 @@ class DayOneEntry(BaseModel):
     tags: Optional[List[str]] = Field(default_factory=list, alias="tags")
     photos: Optional[List[DayOnePhoto]] = Field(default_factory=list, alias="photos")
     videos: Optional[List[DayOneVideo]] = Field(default_factory=list, alias="videos")
+    audios: Optional[List[DayOneAudio]] = Field(default_factory=list, alias="audios")
     duration: Optional[float] = Field(None, alias="duration", ge=0)
     editing_time: Optional[float] = Field(None, alias="editingTime", ge=0)
     is_all_day: Optional[bool] = Field(None, alias="isAllDay")

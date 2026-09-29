@@ -133,7 +133,11 @@ class ImportService:
             return {}
 
         raw_dayone = import_metadata.get("raw_dayone") or {}
-        raw_media_items = (raw_dayone.get("photos") or []) + (raw_dayone.get("videos") or [])
+        raw_media_items = (
+            (raw_dayone.get("photos") or [])
+            + (raw_dayone.get("videos") or [])
+            + (raw_dayone.get("audios") or [])
+        )
         placeholder_map: Dict[str, str] = {}
 
         for item in raw_media_items:

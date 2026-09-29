@@ -393,8 +393,8 @@ class ZipHandler:
 
                 # Check for media directory
                 if source_type == "dayone":
-                    # Day One has photos/ and videos/ directories
-                    media_files = [f for f in normalized_file_list if f.startswith("photos/") or f.startswith("Photos/") or f.startswith("videos/") or f.startswith("Videos/")]
+                    # Day One has photos/, videos/ and audios/ directories
+                    media_files = [f for f in normalized_file_list if f.lower().startswith(("photos/", "videos/", "audios/"))]
                 elif source_type == "daylio":
                     media_files = [f for f in normalized_file_list if f.lower().startswith("assets/")]
                 else:
@@ -515,7 +515,7 @@ class ZipHandler:
 
                     # Determine if this is a media file (using normalized name)
                     if source_type == "dayone":
-                        is_media_file = any(normalized_filename.lower().startswith(p) for p in ["photos/", "videos/"])
+                        is_media_file = any(normalized_filename.lower().startswith(p) for p in ["photos/", "videos/", "audios/"])
                     elif source_type == "daylio":
                         is_media_file = normalized_filename.lower().startswith("assets/")
                     else:
@@ -528,7 +528,7 @@ class ZipHandler:
                         target_dir = media_dest
 
                         if source_type == "dayone":
-                            # For Day One, preserve photos/ or videos/ directories
+                            # For Day One, preserve photos/, videos/ or audios/ directories
                             relative_path = Path(normalized_filename)
                         elif source_type == "daylio":
                             relative_path = Path(normalized_filename)

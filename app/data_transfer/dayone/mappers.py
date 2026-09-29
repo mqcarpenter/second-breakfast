@@ -32,6 +32,7 @@ from .models import (
     DayOneLocation,
     DayOnePhoto,
     DayOneVideo,
+    DayOneAudio,
     DayOneWeather,
 )
 from .richtext_parser import DayOneRichTextParser
@@ -46,7 +47,7 @@ class DayOneToJournivMapper:
     - Entry content and metadata
     - Location data (structured JSON)
     - Weather data (structured JSON)
-    - Media files (photos and videos)
+    - Media files (photos, videos and audio)
     - Tags
     - Timestamps with timezone conversion
     """
@@ -210,6 +211,7 @@ class DayOneToJournivMapper:
                     photos=dayone_entry.photos,
                     videos=dayone_entry.videos,
                     entry_id=None,  # Will be updated after entry creation
+                    audios=dayone_entry.audios,
                 )
                 if delta and isinstance(delta, dict):
                     content_delta = delta
@@ -238,6 +240,7 @@ class DayOneToJournivMapper:
                         text,
                         photos=dayone_entry.photos,
                         videos=dayone_entry.videos,
+                        audios=dayone_entry.audios,
                     )
 
         if content_delta is None:
@@ -379,6 +382,22 @@ class DayOneToJournivMapper:
                 if media_dto:
                     media.append(media_dto)
 
+            for audio in dayone_entry.audios or []:
+                media_path = DayOneParser.find_media_file(
+                    media_dir,
+                    audio.identifier,
+                    md5_hash=audio.md5,
+                    media_type="audio",
+                )
+                media_dto = DayOneToJournivMapper.map_audio_to_media(
+                    audio,
+                    media_path,
+                    dayone_entry.uuid,
+                    media_base_dir=media_dir,
+                )
+                if media_dto:
+                    media.append(media_dto)
+
         return MomentDTO(
             logged_at_utc=creation_date_utc,
             logged_date_tz=entry_date,
@@ -502,6 +521,11 @@ class DayOneToJournivMapper:
 
         photos = DayOneToJournivMapper._prune_media_list(raw_dayone.get("photos"))
         videos = DayOneToJournivMapper._prune_media_list(raw_dayone.get("videos"))
+        audios = DayOneToJournivMapper._prune_media_list(raw_dayone.get("audios"))
+        if audios:
+            raw_dayone["audios"] = audios
+        else:
+            raw_dayone.pop("audios", None)
         if photos:
             raw_dayone["photos"] = photos
         else:
@@ -522,20 +546,42 @@ class DayOneToJournivMapper:
         text: str,
         photos: Optional[List[DayOnePhoto]] = None,
         videos: Optional[List[DayOneVideo]] = None,
+        audios: Optional[List[DayOneAudio]] = None,
     ) -> str:
         """
         Replace Day One dayone-moment:// links in markdown with placeholders.
 
         Example: ![](dayone-moment://IDENTIFIER) -> DAYONE_PHOTO:IDENTIFIER
+        Audio uses a typed form: ![](dayone-moment:/audio/IDENTIFIER) -> DAYONE_AUDIO:IDENTIFIER
         """
-        if "dayone-moment://" not in text:
+        if "dayone-moment:" not in text:
             return text
 
         photo_ids = {p.identifier for p in photos or [] if p.identifier}
         video_ids = {v.identifier for v in videos or [] if v.identifier}
+        audio_ids = {a.identifier for a in audios or [] if a.identifier}
+
+        def typed_repl(match: re.Match) -> str:
+            kind = match.group(1).lower()
+            identifier = match.group(2)
+            if kind == "audio" or identifier in audio_ids:
+                return f"DAYONE_AUDIO:{identifier}"
+            if kind == "video" or identifier in video_ids:
+                return f"DAYONE_VIDEO:{identifier}"
+            return f"DAYONE_PHOTO:{identifier}"
+
+        # Typed links first: dayone-moment:/audio/ID, dayone-moment:/video/ID
+        typed = re.compile(r"!\[[^\]]*\]\(dayone-moment:/(audio|video|photo)/([A-Za-z0-9-]+)\)")
+        text = typed.sub(typed_repl, text)
+        typed_bare = re.compile(r"dayone-moment:/(audio|video|photo)/([A-Za-z0-9-]+)")
+        text = typed_bare.sub(typed_repl, text)
+        if "dayone-moment://" not in text:
+            return text
 
         def repl(match: re.Match) -> str:
             identifier = match.group(1)
+            if identifier in audio_ids:
+                return f"DAYONE_AUDIO:{identifier}"
             if identifier in video_ids:
                 return f"DAYONE_VIDEO:{identifier}"
             if identifier in photo_ids:
@@ -818,6 +864,115 @@ class DayOneToJournivMapper:
             height=video.height,
             duration=video.duration,
             date=video.date,
+            file_metadata=file_metadata,
+            external_provider=None,
+            external_asset_id=external_asset_id,
+            external_metadata=external_metadata,
+        )
+
+    @staticmethod
+    def _sniff_audio_extension(media_path: Path) -> Optional[str]:
+        """Return the real extension for an audio file from its header, or None if unknown."""
+        try:
+            with open(media_path, "rb") as fh:
+                head = fh.read(12)
+        except OSError:
+            return None
+        if len(head) < 4:
+            return None
+        if head[4:8] == b"ftyp":
+            return ".m4a"
+        if head[:3] == b"ID3":
+            return ".mp3"
+        if head[0] == 0xFF and (head[1] & 0xE0) == 0xE0:
+            # Frame sync. Layer bits 00 mean AAC ADTS, anything else is MPEG audio.
+            return ".aac" if (head[1] & 0x06) == 0 else ".mp3"
+        if head[:4] == b"RIFF" and head[8:12] == b"WAVE":
+            return ".wav"
+        if head[:4] == b"OggS":
+            return ".ogg"
+        if head[:4] == b"caff":
+            return ".caf"
+        return None
+
+    @staticmethod
+    def _fix_audio_extension(media_path: Path) -> Path:
+        """Rename an extracted audio file whose extension doesn't match its content."""
+        real_ext = DayOneToJournivMapper._sniff_audio_extension(media_path)
+        if not real_ext or real_ext == media_path.suffix.lower():
+            return media_path
+        target = media_path.with_suffix(real_ext)
+        if target.exists():
+            return target
+        try:
+            media_path.rename(target)
+        except OSError as exc:
+            log_warning(
+                "Could not rename Day One audio to match its format",
+                path=str(media_path),
+                real_ext=real_ext,
+                error=str(exc),
+            )
+            return media_path
+        return target
+
+    @staticmethod
+    def map_audio_to_media(
+        audio: DayOneAudio,
+        media_path: Optional[Path],
+        entry_external_id: str,
+        media_base_dir: Optional[Path] = None,
+    ) -> Optional[MomentMediaDTO]:
+        """
+        Map Day One audio recording to Journiv MomentMediaDTO.
+
+        Args:
+            audio: Day One audio object
+            media_path: Path to actual media file
+            entry_external_id: External ID of parent entry
+            media_base_dir: Base directory for media (used to store relative file_path)
+
+        Returns:
+            MomentMediaDTO if media file exists, None otherwise
+        """
+        if not media_path or not media_path.exists():
+            log_warning(
+                f"Media file not found for audio {audio.identifier}",
+                audio_id=audio.identifier,
+                entry_id=entry_external_id,
+            )
+            return None
+
+        # Day One names every recording .m4a, but older ones are MP3 streams.
+        # Journiv serves media by extension, so give the file its real one.
+        media_path = DayOneToJournivMapper._fix_audio_extension(media_path)
+        ext = media_path.suffix.lower()
+        mime_type = MediaHandler.MIME_TYPE_MAP.get(ext, "audio/mp4")
+
+        file_metadata = {
+            "order_in_entry": audio.order_in_entry,
+            "title": audio.title,
+            "audio_channels": audio.audio_channels,
+            "sample_rate": audio.sample_rate,
+        }
+
+        external_asset_id = audio.md5 or audio.identifier
+        external_metadata = {
+            "identifier": audio.identifier,
+            "md5": audio.md5,
+        }
+
+        return DayOneToJournivMapper._map_media_common(
+            media_path=media_path,
+            identifier=audio.identifier,
+            entry_external_id=entry_external_id,
+            media_base_dir=media_base_dir,
+            media_type="audio",
+            mime_type=mime_type,
+            width=None,
+            height=None,
+            duration=audio.duration,
+            date=audio.date,
             file_metadata=file_metadata,
             external_provider=None,
             external_asset_id=external_asset_id,

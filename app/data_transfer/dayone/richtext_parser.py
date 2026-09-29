@@ -111,12 +111,13 @@ class DayOneRichTextParser:
         richtext: Dict[str, Any],
         photos: Optional[List[Any]] = None,
         videos: Optional[List[Any]] = None,
-        entry_id: Optional[str] = None
+        entry_id: Optional[str] = None,
+        audios: Optional[List[Any]] = None,
     ) -> Dict[str, Any]:
         """
         Convert Day One richText to Quill Delta format.
 
-        Embedded media are represented as image/video embeds with Day One identifiers
+        Embedded media are represented as image/video/audio embeds with Day One identifiers
         (md5 hash preferred), which are replaced after media import.
         """
         contents = richtext.get("contents", [])
@@ -128,6 +129,8 @@ class DayOneRichTextParser:
             media_map[photo.identifier] = photo
         for video in videos or []:
             media_map[video.identifier] = video
+        for audio in audios or []:
+            media_map[audio.identifier] = audio
 
         ops: List[Dict[str, Any]] = []
 
@@ -207,7 +210,7 @@ class DayOneRichTextParser:
                         append_newline()
                         continue
 
-                    if obj_type not in {"photo", "video"}:
+                    if obj_type not in {"photo", "video", "audio"}:
                         continue
 
                     identifier = obj.get("identifier")
@@ -220,7 +223,7 @@ class DayOneRichTextParser:
                         continue
 
                     placeholder = getattr(media, "md5", None) or identifier
-                    key = "image" if obj_type == "photo" else "video"
+                    key = {"photo": "image", "video": "video", "audio": "audio"}[obj_type]
                     ops.append({"insert": {key: placeholder}})
                     append_newline()
 

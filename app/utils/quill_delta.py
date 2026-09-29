@@ -150,7 +150,7 @@ def wrap_plain_text(text: Optional[str]) -> Dict[str, Any]:
     return {"ops": [{"insert": safe_text}]} if safe_text else {"ops": [{"insert": "\n"}]}
 
 
-_DAYONE_PLACEHOLDER_RE = re.compile(r'DAYONE_(PHOTO|VIDEO):([\w-]+)')
+_DAYONE_PLACEHOLDER_RE = re.compile(r'DAYONE_(PHOTO|VIDEO|AUDIO):([\w-]+)')
 
 
 def wrap_dayone_text(text: Optional[str]) -> Dict[str, Any]:
@@ -168,7 +168,7 @@ def wrap_dayone_text(text: Optional[str]) -> Dict[str, Any]:
 
         media_type = match.group(1)
         media_id = match.group(2)
-        key = "image" if media_type == "PHOTO" else "video"
+        key = {"PHOTO": "image", "VIDEO": "video", "AUDIO": "audio"}[media_type]
         ops.append({"insert": {key: media_id}})
 
         next_char = text[end:end + 1]

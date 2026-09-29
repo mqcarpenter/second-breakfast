@@ -187,17 +187,21 @@ class DayOneParser:
             photos_dir_upper = extract_to / "Photos"
             videos_dir_lower = extract_to / "videos"
             videos_dir_upper = extract_to / "Videos"
+            audios_dir_lower = extract_to / "audios"
+            audios_dir_upper = extract_to / "Audios"
 
             # Support both lowercase (common) and uppercase directory names
             photos_exists = photos_dir_lower.exists() or photos_dir_upper.exists()
             videos_exists = videos_dir_lower.exists() or videos_dir_upper.exists()
+            audios_exists = audios_dir_lower.exists() or audios_dir_upper.exists()
 
-            if photos_exists or videos_exists:
+            if photos_exists or videos_exists or audios_exists:
                 media_dir = extract_to
                 log_info(
-                    f"Found media directory with photos={photos_exists}, videos={videos_exists}",
+                    f"Found media directory with photos={photos_exists}, videos={videos_exists}, audios={audios_exists}",
                     has_photos=photos_exists,
-                    has_videos=videos_exists
+                    has_videos=videos_exists,
+                    has_audios=audios_exists,
                 )
 
             return journals, media_dir
@@ -264,10 +268,10 @@ class DayOneParser:
         For example: e249a0b05c6158a53c1338330f9bece4.jpeg
 
         Args:
-            media_dir: Root media directory (contains photos/ and videos/)
+            media_dir: Root media directory (contains photos/, videos/ and audios/)
             identifier: Day One media identifier (UUID) - fallback if MD5 not found
             md5_hash: MD5 hash of the media file (preferred for lookup)
-            media_type: "photo" or "video"
+            media_type: "photo", "video" or "audio"
 
         Returns:
             Path to media file if found, None otherwise
@@ -277,6 +281,8 @@ class DayOneParser:
             search_dirs = [media_dir / "photos", media_dir / "Photos"]
         elif media_type == "video":
             search_dirs = [media_dir / "videos", media_dir / "Videos"]
+        elif media_type == "audio":
+            search_dirs = [media_dir / "audios", media_dir / "Audios"]
         else:
             log_warning(f"Unknown media type: {media_type}", media_type=media_type)
             return None
@@ -298,6 +304,11 @@ class DayOneParser:
             photo_patterns = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.heic'}
             extensions = [ext for ext in ALLOWED_EXTENSIONS if ext.lower() in photo_patterns]
             # Add uppercase variants for case-insensitive matching
+            extensions.extend([ext.upper() for ext in extensions if ext.islower()])
+        elif media_type == "audio":
+            # Audio extensions: Day One records m4a; accept other common formats too
+            audio_patterns = {'.m4a', '.aac', '.mp3', '.wav', '.ogg', '.opus', '.caf'}
+            extensions = [ext for ext in ALLOWED_EXTENSIONS if ext.lower() in audio_patterns]
             extensions.extend([ext.upper() for ext in extensions if ext.islower()])
         else:
             # Video extensions: mp4, avi, mov, webm, m4v
