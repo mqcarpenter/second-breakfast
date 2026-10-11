@@ -147,14 +147,14 @@ describe("failure handling", () => {
 });
 
 describe("interruption", () => {
-  it("returns to queued, due immediately, without losing progress", () => {
+  it("returns to queued, due immediately, refunds the attempt, keeps progress", () => {
     const s = applyEvent(
       item({ status: "syncing", attempts: 2, momentId: "m1" }),
       { type: "interrupted" },
       NOW,
     );
     expect(s.status).toBe("queued");
-    expect(s.attempts).toBe(2);
+    expect(s.attempts).toBe(1); // the interrupted attempt is refunded
     expect(s.momentId).toBe("m1");
     expect(isDue(s, NOW)).toBe(true);
   });

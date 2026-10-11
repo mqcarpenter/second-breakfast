@@ -144,7 +144,7 @@ describe("crash recovery", () => {
     expect(item).toMatchObject({
       status: "queued",
       momentId: "m1",
-      attempts: 1,
+      attempts: 0,
     });
     expect(await outboxRepository.recoverInterrupted("u1", T0)).toBe(0);
   });

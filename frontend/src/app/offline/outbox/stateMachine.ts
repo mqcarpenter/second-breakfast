@@ -131,10 +131,15 @@ export function applyEvent(
         nextAttemptAt: null,
       });
     case "interrupted":
-      // The app was killed mid-sync. Not the item's fault, so no attempt is charged
-      // back and no backoff applies; recorded progress is kept.
+      // The app was killed, or the server or session went away mid-sync. Not the
+      // item's fault, so the attempt it consumed is refunded and no backoff
+      // applies; recorded progress is kept.
       expectStatus("syncing");
-      return touch({ status: "queued", nextAttemptAt: null });
+      return touch({
+        status: "queued",
+        attempts: Math.max(0, item.attempts - 1),
+        nextAttemptAt: null,
+      });
     case "retry":
       expectStatus("failed");
       return touch({
