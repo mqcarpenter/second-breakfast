@@ -110,3 +110,50 @@ def test_build_moment_response_includes_active_people_only() -> None:
     assert response.people[0].name == "Alice"
 
     session.close()
+
+
+def _session_with_user():
+    engine = create_engine("sqlite:///:memory:")
+    BaseModel.metadata.create_all(engine)
+    session = Session(engine)
+    user = User(
+        email=f"test_{uuid.uuid4().hex[:8]}@example.com",
+        password="hashed_password",
+        name="Test User",
+    )
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return session, user
+
+
+def test_moment_responses_expose_client_id_in_both_builders() -> None:
+    """The offline-capture marker must reach the API in single and list responses."""
+    from app.api.v1.endpoints.moments import _build_moment_responses
+
+    session, user = _session_with_user()
+    client_id = uuid.uuid4()
+    captured = Moment(
+        user_id=user.id,
+        logged_at_utc=datetime.now(UTC),
+        logged_date_tz=datetime.now(UTC).date(),
+        note="captured offline",
+        client_id=client_id,
+    )
+    ordinary = Moment(
+        user_id=user.id,
+        logged_at_utc=datetime.now(UTC),
+        logged_date_tz=datetime.now(UTC).date(),
+        note="written online",
+    )
+    session.add_all([captured, ordinary])
+    session.commit()
+    session.refresh(captured)
+    session.refresh(ordinary)
+
+    assert _build_moment_response(session, captured, user).client_id == client_id
+    assert _build_moment_response(session, ordinary, user).client_id is None
+
+    listed = {m.id: m for m in _build_moment_responses(session, [captured, ordinary], user)}
+    assert listed[captured.id].client_id == client_id
+    assert listed[ordinary.id].client_id is None
