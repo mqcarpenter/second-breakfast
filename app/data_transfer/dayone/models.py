@@ -111,6 +111,19 @@ class DayOneWeather(BaseModel):
     wind_speed_kph: Optional[float] = Field(None, alias="windSpeedKPH", ge=0)
     wind_bearing: Optional[int] = Field(None, alias="windBearing", ge=0, le=359)
 
+    @field_validator("temperature_celsius", mode="before")
+    @classmethod
+    def validate_temperature(cls, v: Optional[float]) -> Optional[float]:
+        """Drop physically implausible temperatures instead of failing the whole import."""
+        if v is None:
+            return None
+        try:
+            if not math.isfinite(v) or v < -100 or v > 70:
+                return None
+        except TypeError:
+            return v
+        return v
+
     @field_validator("wind_bearing", mode="before")
     @classmethod
     def validate_wind_bearing(cls, v: Optional[int]) -> Optional[int]:
