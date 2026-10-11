@@ -3064,6 +3064,10 @@ export type MomentCompletedGoalResponse = {
 export type MomentCreate = {
     entry?: MomentEntryCreate | null;
     /**
+     * Client Id
+     */
+    client_id?: string | null;
+    /**
      * Logged At Utc
      */
     logged_at_utc?: string | null;
@@ -3375,6 +3379,10 @@ export type MomentResponse = {
      * Note
      */
     note?: string | null;
+    /**
+     * Client Id
+     */
+    client_id?: string | null;
     /**
      * Location Json
      */
