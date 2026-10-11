@@ -9,6 +9,10 @@ export type ShellContextValue = {
   openNavigation: () => void;
   /** Opens the Quick Log capture sheet (docs/features/quicklog.md). */
   openQuickLog: () => void;
+  /** Opens the offline-capable capture sheet (docs/features/pwa.md). */
+  openCapture: () => void;
+  /** Opens the list of entries waiting to sync (docs/features/pwa.md). */
+  openOutbox: () => void;
   /** Whether the mounted editor has unsaved changes. useLocalDraft already
    *  flushes a safety-net copy on pagehide, so this only gates the PWA
    *  update bar's confirmation (docs/features/pwa.md) -- it is not a save
@@ -20,6 +24,8 @@ export type ShellContextValue = {
 export const ShellContext = createContext<ShellContextValue>({
   openNavigation: () => {},
   openQuickLog: () => {},
+  openCapture: () => {},
+  openOutbox: () => {},
   hasUnsavedDraft: false,
   setHasUnsavedDraft: () => {},
 });

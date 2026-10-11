@@ -1,6 +1,8 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { formatDistance } from "date-fns";
 import { useEffect, useState } from "react";
+import { OutboxNotice } from "../capture/OutboxNotice";
+import { useOutbox } from "../capture/useOutbox";
 
 const RELATIVE_TIME_REFRESH_MS = 60_000;
 
@@ -12,6 +14,7 @@ const RELATIVE_TIME_REFRESH_MS = 60_000;
  */
 export function OfflineBar() {
   const queryClient = useQueryClient();
+  const queue = useOutbox();
   const [now, setNow] = useState(Date.now);
   useEffect(() => {
     const interval = window.setInterval(
@@ -29,14 +32,16 @@ export function OfflineBar() {
   );
 
   return (
-    <div className="jv-offline-bar" role="status">
+    <div className="jv-offline-bar jv-outbox-bar" role="status">
       <span className="text-sm text-foreground">
         You&rsquo;re offline. Showing cached content
         {mostRecentSync > 0
           ? ` from ${formatDistance(mostRecentSync, now, { addSuffix: true })}`
           : ""}
-        . New entries and edits are unavailable until you&rsquo;re back online.
+        . Editing is unavailable until you&rsquo;re back online, but you can
+        still capture new entries.
       </span>
+      <OutboxNotice queue={queue} />
     </div>
   );
 }

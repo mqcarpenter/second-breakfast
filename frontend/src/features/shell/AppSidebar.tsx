@@ -15,6 +15,7 @@ import {
   LogOut,
   Monitor,
   Moon,
+  PenLine,
   Plus,
   RefreshCw,
   Settings,
@@ -102,6 +103,21 @@ export function AppSidebar({
       >
         <Plus aria-hidden="true" size={16} />
         New entry
+      </Button>
+
+      {/* Capture writes to the device first and syncs later, so unlike
+          "New entry" it is available offline too. Outline, not brand: the one
+          filled brand control stays "New entry". */}
+      <Button
+        variant="outline"
+        className="jv-nav__capture"
+        onClick={() => {
+          onNavigate?.();
+          shell.openCapture();
+        }}
+      >
+        <PenLine aria-hidden="true" size={16} />
+        Capture
       </Button>
 
       {QUICK_LOG_ENABLED ? (

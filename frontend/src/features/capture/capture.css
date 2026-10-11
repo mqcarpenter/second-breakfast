@@ -1,0 +1,153 @@
+/* Offline capture sheet (docs/features/pwa.md, "Offline capture and sync").
+   The overlay chrome belongs to AppAdaptiveDialog (.jv-overlay*); this styles
+   only what sits inside its scroll body. Tokens only, matching quicklog.css. */
+
+.jv-capture {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.jv-capture__error {
+  margin: 0;
+  color: var(--destructive);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.jv-capture__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.jv-capture__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.jv-capture__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* ---- attachments ---------------------------------------------------------- */
+
+.jv-capture__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.jv-capture__item {
+  position: relative;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--muted);
+}
+
+.jv-capture__thumb {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.jv-capture__thumb--audio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--card);
+  color: var(--muted-foreground);
+}
+
+.jv-capture__remove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: color-mix(in oklch, var(--background) 70%, transparent);
+}
+
+.jv-capture__recording {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+  font-variant-numeric: tabular-nums;
+}
+
+.jv-capture__pulse {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: var(--destructive);
+}
+
+.jv-capture__location {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .jv-capture__pulse {
+    animation: jv-capture-pulse 1.2s ease-in-out infinite;
+  }
+}
+
+@keyframes jv-capture-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* ---- outbox review ---------------------------------------------------------- */
+
+.jv-outbox__list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.jv-outbox__row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.jv-outbox__row:last-child {
+  border-bottom: 0;
+}
+
+.jv-outbox__main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.jv-outbox__actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: var(--space-2);
+}
+
+.jv-outbox__error {
+  color: var(--destructive);
+  font-size: 0.75rem;
+  font-weight: 500;
+}

@@ -15,6 +15,7 @@ import { currentUserQuery } from "../../api/query/options";
 import { IconButton } from "../../components/ui/icon-button";
 import type { SettingsSection } from "../settings/SettingsModal";
 import { AppSidebar } from "./AppSidebar";
+import { OutboxBar } from "../capture/OutboxBar";
 import { OfflineBar } from "./OfflineBar";
 import { ShellContext } from "./shellContext";
 import { UpdateBar } from "./UpdateBar";
@@ -27,6 +28,12 @@ export { useShell } from "./shellContext";
 
 const SettingsModal = lazy(async () => ({
   default: (await import("../settings/SettingsModal")).SettingsModal,
+}));
+const CaptureSheet = lazy(async () => ({
+  default: (await import("../capture/CaptureSheet")).CaptureSheet,
+}));
+const OutboxSheet = lazy(async () => ({
+  default: (await import("../capture/OutboxSheet")).OutboxSheet,
 }));
 const QuickLogSheet = lazy(async () => ({
   default: (await import("../quicklog/QuickLogSheet")).QuickLogSheet,
@@ -52,6 +59,11 @@ export function AppShell() {
   // leaving it mounted on close lets the overlay animate out.
   const [quickLogOpen, setQuickLogOpen] = useState(false);
   const [quickLogKey, setQuickLogKey] = useState(0);
+  // Capture writes to the on-device outbox, so it works with or without a
+  // connection. Like Quick Log it remounts per open so each capture starts clean.
+  const [captureOpen, setCaptureOpen] = useState(false);
+  const [captureKey, setCaptureKey] = useState(0);
+  const [outboxOpen, setOutboxOpen] = useState(false);
   const [hasUnsavedDraft, setHasUnsavedDraft] = useState(false);
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -95,12 +107,19 @@ export function AppShell() {
           setQuickLogKey((key) => key + 1);
           setQuickLogOpen(true);
         },
+        openCapture: () => {
+          setCaptureKey((key) => key + 1);
+          setCaptureOpen(true);
+        },
+        openOutbox: () => setOutboxOpen(true),
         hasUnsavedDraft,
         setHasUnsavedDraft,
       }}
     >
       <div className={cx("jv-shell", detailActive && "is-detail")}>
-        {offline && <OfflineBar />}
+        {/* One top row: the offline notice (which also reports the queue) or,
+            when online, the queue notice alone. */}
+        {offline ? <OfflineBar /> : <OutboxBar />}
         <Dialog.Root open={drawerOpen} onOpenChange={setDrawerOpen}>
           <Dialog.Portal>
             <Dialog.Backdrop className="z-30 fixed inset-0 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0" />
@@ -146,6 +165,22 @@ export function AppShell() {
               open={quickLogOpen}
               onOpenChange={setQuickLogOpen}
             />
+          </Suspense>
+        )}
+
+        {captureKey > 0 && (
+          <Suspense fallback={null}>
+            <CaptureSheet
+              key={captureKey}
+              open={captureOpen}
+              onOpenChange={setCaptureOpen}
+            />
+          </Suspense>
+        )}
+
+        {outboxOpen && (
+          <Suspense fallback={null}>
+            <OutboxSheet open={outboxOpen} onOpenChange={setOutboxOpen} />
           </Suspense>
         )}
 

@@ -18,6 +18,8 @@ function renderUpdateBar(hasUnsavedDraft: boolean) {
   const value: ShellContextValue = {
     openNavigation: () => {},
     openQuickLog: () => {},
+    openCapture: () => {},
+    openOutbox: () => {},
     hasUnsavedDraft,
     setHasUnsavedDraft: () => {},
   };
