@@ -38,6 +38,9 @@ class MomentEntryCreate(BaseModel):
 
 class MomentCreate(BaseModel):
     entry: Optional[MomentEntryCreate] = None
+    # Optional client-generated id; repeating a create with the same id returns the
+    # existing moment instead of creating a duplicate (used by offline sync).
+    client_id: Optional[uuid.UUID] = None
     logged_at_utc: Optional[datetime] = None
     logged_date_tz: Optional[date] = None
     logged_timezone: Optional[str] = None
@@ -102,6 +105,7 @@ class MomentResponse(TimestampMixin):
     logged_date_tz: date
     logged_timezone: str
     note: Optional[str] = None
+    client_id: Optional[uuid.UUID] = None
     location_json: Optional[Dict[str, Any]] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None

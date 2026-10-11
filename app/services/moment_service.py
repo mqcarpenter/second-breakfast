@@ -8,7 +8,7 @@ from datetime import date, datetime, timedelta
 from typing import Any, List, Optional, Tuple
 
 from sqlalchemy import String, and_, cast, extract, func, or_
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, col, delete, select
 
@@ -63,6 +63,15 @@ class MomentService:
 
     def _get_owned_moment(self, user_id: uuid.UUID, moment_id: uuid.UUID) -> Moment:
         return get_owned_moment(self.session, user_id, moment_id)
+
+    def _find_by_client_id(
+        self, user_id: uuid.UUID, client_id: uuid.UUID
+    ) -> Optional[Moment]:
+        return self.session.exec(
+            select(Moment).where(
+                Moment.user_id == user_id, Moment.client_id == client_id
+            )
+        ).first()
 
     def _get_owned_moment_with_relations(
         self, user_id: uuid.UUID, moment_id: uuid.UUID
@@ -389,6 +398,16 @@ class MomentService:
         from app.services.entry_service import EntryService
         from app.services.user_service import UserService
 
+        # Idempotent create: a repeated client_id returns the existing moment.
+        if moment_data.client_id is not None:
+            existing = self._find_by_client_id(user_id, moment_data.client_id)
+            if existing is not None:
+                log_info(
+                    f"Moment create replayed for user {user_id}: client_id "
+                    f"{moment_data.client_id} -> {existing.id}"
+                )
+                return existing
+
         user_service = UserService(self.session)
         user_tz = user_service.get_user_timezone(user_id)
 
@@ -412,6 +431,7 @@ class MomentService:
             logged_date_tz=normalized_date,
             logged_timezone=normalized_tz,
             note=moment_data.note,
+            client_id=moment_data.client_id,
             location_json=moment_data.location_json,
             latitude=moment_data.latitude,
             longitude=moment_data.longitude,
@@ -440,6 +460,15 @@ class MomentService:
             self.session.refresh(moment)
             if created_entry:
                 self.session.refresh(created_entry)
+        except IntegrityError as exc:
+            self.session.rollback()
+            # Two requests with the same client_id raced; the loser returns the winner.
+            if moment_data.client_id is not None:
+                existing = self._find_by_client_id(user_id, moment_data.client_id)
+                if existing is not None:
+                    return existing
+            log_error(exc)
+            raise
         except SQLAlchemyError as exc:
             self.session.rollback()
             log_error(exc)

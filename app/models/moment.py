@@ -16,6 +16,7 @@ from sqlalchemy import (
     Integer,
     String,
     UniqueConstraint,
+    Uuid,
     event,
 )
 from sqlalchemy import Enum as SAEnum
@@ -92,6 +93,11 @@ class Moment(BaseModel, table=True):
         description="IANA timezone for the moment context"
     )
     note: Optional[str] = Field(None, max_length=500)
+    client_id: Optional[uuid.UUID] = Field(
+        default=None,
+        sa_column=Column(Uuid(), nullable=True),
+        description="Client-generated id that makes offline creates idempotent (unique per user)"
+    )
 
     # Structured location fields
     location_json: Optional[Dict[str, Any]] = Field(
@@ -161,6 +167,7 @@ class Moment(BaseModel, table=True):
         Index('idx_moment_latitude_longitude', 'latitude', 'longitude'),
         Index('idx_moment_prompt_id', 'prompt_id'),
         Index('idx_moment_note', 'note'),
+        Index('uq_moment_user_client_id', 'user_id', 'client_id', unique=True),
         CheckConstraint('media_count >= 0', name='check_moment_media_count_non_negative'),
     )
 
