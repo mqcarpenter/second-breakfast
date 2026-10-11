@@ -241,6 +241,94 @@ airplane mode after the server-side session has expired. That is inherent to
 any useful offline reading, not a defect, and is written down here rather
 than left to be discovered.
 
+## Offline capture and sync
+
+Offline reading (above) never writes. **Capture** is the one write that works
+without the server: the sidebar's outline **Capture** action opens an adaptive
+sheet (`src/features/capture/CaptureSheet.tsx`, mounted by `AppShell` like Quick
+Log) for text, photos, video, in-app audio and an optional, explicitly requested
+location. It writes to an on-device **outbox** and never to the network, so it
+behaves the same online and off. Saving closes the sheet with a "Saved on this
+device" toast and asks the sync engine to run.
+
+It is a sheet rather than a routed page: it needs no route-guard exception in
+offline-restricted mode, and it follows Quick Log's established overlay pattern.
+The sidebar's brand **New entry** stays disabled offline; Capture is the offline
+way to write.
+
+**Outbox** (`src/app/offline/outbox/`). A database of its own, `journiv-outbox`
+(version 1: `items` keyed by `clientId`, `media` keyed by `[clientId, index]`),
+so no other module's version ladder can wipe queued writing. Bytes are stored as
+`ArrayBuffer` (Safari-reliable) in a separate store so listing the queue never
+loads photos. `clientId` is the UUID sent as `client_id`. An item moves
+`queued -> syncing -> synced | failed` (`stateMachine.ts`, pure and exhaustively
+tested). Unlike the read cache, **storage failures here are loud**
+(`OutboxStorageError`): the queue holds the only copy of someone's writing.
+Enqueue is all-or-nothing in one transaction.
+
+**Idempotency.** `POST /moments` accepts an optional `client_id`, unique per
+user (`uq_moment_user_client_id`). A repeated create returns the existing Moment,
+including when two requests race (the unique index rejects the loser, which then
+returns the winner). Media upload already dedupes per Moment by checksum
+(`uq_moment_media_moment_checksum`). Together, repeating any step is harmless.
+
+**Sync** (`syncEngine.ts`). Oldest first, per item: create the Moment, upload
+each file, mark synced; progress is recorded after every step, so a sync killed
+at any point resumes without loss or duplicates (unit-tested with a kill at five
+different steps). The server is probed (`GET /api/v1/health`, 5s) before anything
+is sent. Failures are classified: connectivity and auth stop the run and requeue
+the item with its attempt refunded; 5xx/429/timeouts back off (5s doubling to
+15 minutes, 8 automatic attempts, then the item waits for the user); a rejection
+(bad data, unsupported or too-large file) fails that item alone with a plain
+reason. A failed upload leaves the Moment, and therefore the text, already on the
+server. Media uploads use the XHR helper, which does not refresh an expired token
+the way the API client does, so the runtime refreshes once and retries.
+
+**Triggers** (`syncTriggers.ts`, started from `main.tsx`). iOS Safari has no
+Background Sync, so nothing runs while the app is closed. Sync is attempted at
+launch, on `visibilitychange` to visible, on `online`, every 30 seconds while
+visible, and right after a save. `navigator.onLine` only decides *when to ask*;
+the probe decides whether the server is really there. A session killed mid-sync
+is recovered at the next launch.
+
+**Status UI.** Standing chrome in the shell's one top row (never a toast):
+`OfflineBar` when offline, `OutboxBar` when online, both showing how many entries
+are waiting, how many need attention, and a warning once anything has waited over
+7 days (iOS may evict web-app storage after long disuse). **Review** opens
+`OutboxSheet`: each waiting entry with its state and failure reason, **Retry**
+for failed ones, **Discard** behind a confirmation, and **Sync now**. Synced items
+are kept for 24 hours and then pruned.
+
+**Storage.** `navigator.storage.persist()` is requested after the first entry is
+saved (never on a blank launch). Before staging, `navigator.storage.estimate()`
+refuses a capture that cannot fit and warns past 80% of the quota
+(`storage.ts`); an unknown estimate never blocks writing.
+
+**What the entry is.** The typed text becomes the Entry body; photos, video and
+audio attach to the Moment, exactly like voice notes and Quick Log media. They
+appear in the reader's gallery and can be placed in the body later with "Add to
+entry" in the editor. A media-only capture becomes a media-only Moment.
+
+Queued entries are keyed by user and **survive sign-out**: erasing unsynced
+writing silently would be data loss. They sync the next time that user is signed
+in and the server is reachable.
+
+### Known gaps
+
+- Create-only. Editing an existing entry offline is out of scope (conflict
+  handling).
+- A clip still being recorded when the app is killed is lost; once Stop is
+  pressed it is in the outbox.
+- Media is not embedded inline in the body at sync time.
+- The picker accepts any `image/*` or `video/*`; the instance's format list is
+  not available offline, so an unsupported file fails at sync with a clear reason
+  and stays on the device.
+- Uploads time out after 60 seconds each; a very large video over a slow link is
+  retried with backoff rather than resumed.
+- `openapi/openapi.json` gained `client_id` by hand (two schemas) and was
+  regenerated, not re-pulled from a Plus-enabled backend. Re-pull when one is
+  available.
+
 ## Deployment security
 
 The shipped deployment is same-origin: FastAPI serves both the frontend and
