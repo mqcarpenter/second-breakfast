@@ -1,0 +1,11 @@
+# Install to /etc/systemd/system/second-breakfast-backup.timer
+[Unit]
+Description=Run second-breakfast backup nightly
+
+[Timer]
+OnCalendar=*-*-* 03:30:00
+Persistent=true
+RandomizedDelaySec=10min
+
+[Install]
+WantedBy=timers.target

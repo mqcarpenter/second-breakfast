@@ -1,0 +1,12 @@
+# Install to /etc/systemd/system/second-breakfast-backup.service
+[Unit]
+Description=second-breakfast nightly backup
+After=docker.service
+
+[Service]
+Type=oneshot
+User=<user>
+EnvironmentFile=/etc/second-breakfast-backup.env
+ExecStart=/home/<user>/second-breakfast/deploy/backup/backup.sh
+Nice=10
+IOSchedulingClass=idle

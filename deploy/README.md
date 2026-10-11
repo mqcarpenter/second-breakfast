@@ -47,3 +47,20 @@ Set `DISABLE_SIGNUP=true` in `.env` and run `docker compose up -d`.
 - `curl -kI https://<name>.local` returns 200 through Caddy.
 - `curl -s https://<name>.local/api/v1/health`
 - Port 8000 is not reachable from the LAN.
+
+## Backups
+
+Nightly Postgres dump plus a media mirror to a **second disk** (7 daily and 4 weekly dumps).
+A backup on the same disk as the data is not a backup, so `BACKUP_MOUNT` must be a different physical disk.
+The script refuses to run if that disk is not mounted.
+
+1. `sudo apt install rsync`
+2. `sudo cp deploy/backup/backup.env.example /etc/second-breakfast-backup.env`, edit the three paths, `sudo chmod 600` it.
+3. Copy the two `.example` unit files in `deploy/backup/` to `/etc/systemd/system/` without the `.example`, fill in `<user>`.
+4. Test once by hand: `sudo systemctl start second-breakfast-backup.service`, then `journalctl -u second-breakfast-backup -n 30`.
+5. `sudo systemctl daemon-reload && sudo systemctl enable --now second-breakfast-backup.timer`
+6. Prove restores work: `set -a; . /etc/second-breakfast-backup.env; set +a; deploy/backup/restore-test.sh`
+   (restores into a throwaway database and drops it).
+
+Media is mirrored without `--delete`, so an accidental deletion stays in the backup. Prune the backup by hand when sure.
+Backups never go in the repo.
