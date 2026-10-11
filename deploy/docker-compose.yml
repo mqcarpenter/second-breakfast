@@ -1,0 +1,166 @@
+# second-breakfast deployment: Journiv (built from this repo) + Postgres + Valkey + Caddy.
+# Run from this directory:  docker compose up -d --build
+# Isolated Compose project: its own network and container names, so it does not
+# collide with other stacks on the same host. Only Caddy publishes host ports.
+
+name: second-breakfast
+
+x-base-env: &base-env
+  REDIS_URL: redis://valkey:6379/0
+  CELERY_BROKER_URL: redis://valkey:6379/0
+  CELERY_RESULT_BACKEND: redis://valkey:6379/0
+  DB_DRIVER: postgres
+  POSTGRES_HOST: postgres
+  ENVIRONMENT: production
+  ALLOW_INSECURE_COOKIE_AUTH_OVER_HTTP: "false"
+
+x-journiv: &journiv
+  image: second-breakfast/journiv-app:local
+  env_file: .env
+  volumes:
+    - ${DATA_DIR:-./data}:/data
+    - ${MEDIA_DIR:-./data/media}:/data/media
+  depends_on:
+    postgres:
+      condition: service_healthy
+    valkey:
+      condition: service_healthy
+  networks:
+    - backend
+  restart: unless-stopped
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "50m"
+      max-file: "5"
+
+services:
+  postgres:
+    image: postgres:18.1
+    container_name: sb-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-journiv}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in deploy/.env}
+      POSTGRES_DB: ${POSTGRES_DB:-journiv_prod}
+    volumes:
+      # Local disk only. Never put the database on SMB/NFS.
+      - ${DATA_DIR:-./data}/postgres:/var/lib/postgresql
+    networks:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-journiv} -d ${POSTGRES_DB:-journiv_prod}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  valkey:
+    image: valkey/valkey:9.0-alpine
+    container_name: sb-valkey
+    volumes:
+      - ${DATA_DIR:-./data}/valkey:/data
+    networks:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    <<: *journiv
+    build:
+      context: ..
+      args:
+        REQUIRE_PLUS_FEATURES: "false"
+    container_name: sb-app
+    # No host port is published. Caddy reaches this over the proxy network.
+    environment:
+      <<: *base-env
+      SERVICE_ROLE: app
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      RATE_LIMIT_STORAGE_URI: redis://valkey:6379/1
+    networks:
+      - backend
+      - proxy
+    healthcheck:
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  celery-worker:
+    <<: *journiv
+    container_name: sb-celery-worker
+    command: >
+      celery -A app.core.celery_app worker
+      --loglevel=info
+      --concurrency=${CELERY_WORKER_CONCURRENCY:-1}
+      --max-memory-per-child=${CELERY_WORKER_MAX_MEMORY_PER_CHILD_KB:-300000}
+      --max-tasks-per-child=${CELERY_WORKER_MAX_TASKS_PER_CHILD:-200}
+    environment:
+      <<: *base-env
+      SERVICE_ROLE: celery-worker
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  celery-beat:
+    <<: *journiv
+    container_name: sb-celery-beat
+    command: celery -A app.core.celery_app beat --loglevel=info --scheduler redbeat.RedBeatScheduler --pidfile=/tmp/celerybeat.pid
+    environment:
+      <<: *base-env
+      SERVICE_ROLE: celery-beat
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      REDBEAT_REDIS_URL: redis://valkey:6379/2
+    healthcheck:
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  admin-cli:
+    <<: *journiv
+    container_name: sb-admin-cli
+    profiles: ["admin"]
+    command: ["sleep", "infinity"]
+    environment:
+      <<: *base-env
+      SERVICE_ROLE: admin-cli
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ${DATA_DIR:-./data}:/data
+      - ${MEDIA_DIR:-./data/media}:/data/media
+      - ${IMPORTS_DIR:-./data/imports}:/imports:ro
+    healthcheck:
+      disable: true
+
+  caddy:
+    image: caddy:2
+    container_name: sb-caddy
+    ports:
+      - "${CADDY_HTTPS_PORT:-443}:443"
+      - "${CADDY_HTTP_PORT:-80}:80"
+    environment:
+      JOURNAL_HOST: ${JOURNAL_HOST:?set JOURNAL_HOST in deploy/.env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy/data:/data
+      - ./caddy/config:/config
+    depends_on:
+      - app
+    networks:
+      - proxy
+    restart: unless-stopped
+
+networks:
+  backend:
+    driver: bridge
+  proxy:
+    driver: bridge

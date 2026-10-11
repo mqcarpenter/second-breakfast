@@ -1,0 +1,14 @@
+# Publishes an extra mDNS name for this host so <name>.local resolves on the LAN.
+# Install: copy to /etc/systemd/system/mdns-alias.service, replace the placeholders,
+# then `sudo systemctl enable --now mdns-alias`. Needs: sudo apt install avahi-utils
+[Unit]
+Description=mDNS alias for second-breakfast
+After=avahi-daemon.service network-online.target
+Requires=avahi-daemon.service
+
+[Service]
+ExecStart=/usr/bin/avahi-publish -a -R <name>.local <server-lan-ip>
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
