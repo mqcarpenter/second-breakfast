@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./**/.env)",
+      "Read(./deploy/.env)",
+      "Read(./secrets/**)",
+      "Read(./CLAUDE.local.md)"
+    ]
+  }
+}

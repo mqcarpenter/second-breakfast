@@ -254,3 +254,25 @@ frontend/.playwright/
 # ===============================================================
 # END OF FILE
 # ===============================================================
+
+# --- mqcarpenter fork: private data guardrails ---
+.env.*
+!env.template
+*.local.*
+CLAUDE.local.md
+.claude/settings.local.json
+secrets/
+deploy/.env
+deploy/caddy/data/
+deploy/caddy/config/
+*.pem
+*.key
+*.crt
+*.p12
+*.zip
+/imports/
+/media/
+/exports/
+*.sql
+*.dump
+*.sql.gz

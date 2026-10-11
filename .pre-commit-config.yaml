@@ -13,3 +13,8 @@ repos:
         entry: uv run ty check
         language: system
         types_or: [python, pyi]
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
