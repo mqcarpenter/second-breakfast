@@ -530,3 +530,11 @@
 .jv-library {
   animation: jv-pane-enter var(--duration-enter) var(--ease);
 }
+
+/* Entry that was written on the device first and confirmed by the server. */
+.jv-origin {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}

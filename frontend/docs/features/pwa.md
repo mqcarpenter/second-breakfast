@@ -244,17 +244,17 @@ than left to be discovered.
 ## Offline capture and sync
 
 Offline reading (above) never writes. **Capture** is the one write that works
-without the server: the sidebar's outline **Capture** action opens an adaptive
-sheet (`src/features/capture/CaptureSheet.tsx`, mounted by `AppShell` like Quick
-Log) for text, photos, video, in-app audio and an optional, explicitly requested
-location. It writes to an on-device **outbox** and never to the network, so it
-behaves the same online and off. Saving closes the sheet with a "Saved on this
+without the server. There is a single **New entry** action
+(`useNewEntryTarget`): with a reachable server it opens the full editor; without
+one -- the app booted offline-restricted, or the connection dropped mid-session --
+it opens the Capture sheet (`src/features/capture/CaptureSheet.tsx`, mounted by
+`AppShell` like Quick Log) for text, photos, video, in-app audio and an
+optional, explicitly requested location. Capture writes to an on-device
+**outbox** and never to the network. Saving closes the sheet with a "Saved on this
 device" toast and asks the sync engine to run.
 
 It is a sheet rather than a routed page: it needs no route-guard exception in
 offline-restricted mode, and it follows Quick Log's established overlay pattern.
-The sidebar's brand **New entry** stays disabled offline; Capture is the offline
-way to write.
 
 **Outbox** (`src/app/offline/outbox/`). A database of its own, `journiv-outbox`
 (version 1: `items` keyed by `clientId`, `media` keyed by `[clientId, index]`),
@@ -291,13 +291,27 @@ visible, and right after a save. `navigator.onLine` only decides *when to ask*;
 the probe decides whether the server is really there. A session killed mid-sync
 is recovered at the next launch.
 
-**Status UI.** Standing chrome in the shell's one top row (never a toast):
-`OfflineBar` when offline, `OutboxBar` when online, both showing how many entries
-are waiting, how many need attention, and a warning once anything has waited over
-7 days (iOS may evict web-app storage after long disuse). **Review** opens
-`OutboxSheet`: each waiting entry with its state and failure reason, **Retry**
-for failed ones, **Discard** behind a confirmation, and **Sync now**. Synced items
-are kept for 24 hours and then pruned.
+**Status UI.** Three surfaces, none of them a toast for standing state:
+
+- Standing chrome in the shell's one top row (`OfflineBar` offline, `OutboxBar`
+  online): how many entries are waiting, how many need attention, and a warning
+  once anything has waited over 7 days (iOS may evict web-app storage after long
+  disuse). **Review** opens `OutboxSheet`.
+- **Pending rows** at the top of the unfiltered or single-journal Timeline
+  (`PendingEntries`): "Waiting to sync" entries labelled "On this device", or
+  "Needs attention" with the reason. They use the Moment row grammar so a capture
+  is never invisible after Save. A tag, person or search view shows none, because
+  it cannot honestly say whether an unsynced entry belongs there.
+- **The confirmation.** When the server accepts a batch, a toast says how many
+  entries were saved, the Timeline refreshes, and the pending row is replaced by
+  the real Moment carrying a lasting **"Synced from device"** marker
+  (`DeviceOrigin`, in the Timeline row and the reader/editor header). The marker
+  is driven by `client_id`, which the server returns only for entries created
+  through the outbox -- a fact the API returned, never inferred. `OutboxSheet`
+  also lists entries confirmed in the last 24 hours with when they were saved.
+
+`OutboxSheet` offers **Retry** for failed entries, **Discard** behind a
+confirmation, and **Sync now**.
 
 **Storage.** `navigator.storage.persist()` is requested after the first entry is
 saved (never on a blank launch). Before staging, `navigator.storage.estimate()`

@@ -5,6 +5,7 @@ import type {
   JournalResponse,
   MomentResponse,
 } from "../../api/generated/types.gen";
+import { DeviceOrigin } from "../../components/journiv/DeviceOrigin";
 import { MomentMeta } from "../../components/journiv/MomentMeta";
 import { formatTimeOfDay } from "../../lib/datetime";
 import {
@@ -68,6 +69,7 @@ export function MomentListItem({
             {formatTimeOfDay(moment.logged_at_utc, moment.logged_timezone)}
           </span>
           {kindLabel && <Badge variant="outline">{kindLabel}</Badge>}
+          <DeviceOrigin moment={moment} />
           {moment.is_pinned && (
             <Pin className="jv-moment__pin" aria-label="Pinned" size={12} />
           )}

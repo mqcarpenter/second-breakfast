@@ -24,6 +24,7 @@ import { SearchInput } from "../../components/ui/search-input";
 import { Skeleton } from "../../components/ui/skeleton";
 import { useJournalLookup } from "../../lib/useJournalLookup";
 import { usePaneScrollRestoration } from "../../lib/usePaneScrollRestoration";
+import { PendingEntries } from "../capture/PendingEntries";
 import { QUICK_LOG_ENABLED, useShell } from "../shell/shellContext";
 import { groupMomentsByDay } from "./dateGroups";
 import { MomentListItem } from "./MomentListItem";
@@ -204,6 +205,15 @@ export function TimelinePage() {
               }
             />
           ))}
+
+        {/* Written on this device, not yet confirmed by the server. Only in the
+            unfiltered or single-journal list: a tag, person or search view
+            cannot honestly say whether an unsynced entry belongs there. */}
+        {!search.q && (scope.kind === "all" || scope.kind === "journal") && (
+          <PendingEntries
+            journalId={scope.kind === "journal" ? scope.id : undefined}
+          />
+        )}
 
         {groups.map((group) => (
           <div className="jv-list__group" key={group.key}>

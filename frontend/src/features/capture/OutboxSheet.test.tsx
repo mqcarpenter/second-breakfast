@@ -63,7 +63,23 @@ afterEach(async () => {
 describe("OutboxSheet", () => {
   it("says so when nothing is waiting", async () => {
     render(<OutboxSheet open onOpenChange={vi.fn()} />);
+    expect(await screen.findByText("Nothing to sync")).toBeTruthy();
+  });
+
+  it("confirms an entry the server has accepted, instead of dropping it", async () => {
+    await queue("a", "already saved");
+    await outboxRepository.apply("a", { type: "start" });
+    await outboxRepository.apply("a", {
+      type: "momentCreated",
+      momentId: "m1",
+    });
+    await outboxRepository.apply("a", { type: "succeeded" });
+    render(<OutboxSheet open onOpenChange={vi.fn()} />);
+
     expect(await screen.findByText("Everything is synced")).toBeTruthy();
+    const recent = screen.getByRole("region", { name: "Recently synced" });
+    expect(recent.textContent).toContain("already saved");
+    expect(recent.textContent).toContain("Saved to your journal");
   });
 
   it("lists waiting entries and shows why a failed one failed", async () => {

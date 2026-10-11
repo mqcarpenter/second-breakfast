@@ -1,5 +1,5 @@
 import { formatDistanceToNow } from "date-fns";
-import { CloudUpload, RotateCw, Trash2 } from "lucide-react";
+import { CloudCheck, CloudUpload, RotateCw, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { outboxRepository } from "../../app/offline/outbox/outboxRepository";
 import { requestOutboxSync } from "../../app/offline/outbox/syncRuntime";
@@ -54,7 +54,7 @@ export function OutboxSheet({
   onOpenChange: (open: boolean) => void;
 }) {
   const compact = useCompactViewport();
-  const { pending } = useOutbox();
+  const { pending, synced } = useOutbox();
   const [discarding, setDiscarding] = useState<OutboxItem | null>(null);
   const [error, setError] = useState("");
   const now = new Date();
@@ -112,9 +112,15 @@ export function OutboxSheet({
             {error}
           </p>
         )}
-        {pending.length === 0 ? (
+        {pending.length === 0 && synced.length === 0 ? (
           <StatusView
             icon={<CloudUpload size={22} />}
+            title="Nothing to sync"
+            description="Entries you capture on this device show up here until the server confirms them."
+          />
+        ) : pending.length === 0 ? (
+          <StatusView
+            icon={<CloudCheck size={22} />}
             title="Everything is synced"
             description="Nothing is waiting on this device."
           />
@@ -167,6 +173,31 @@ export function OutboxSheet({
               </li>
             ))}
           </ul>
+        )}
+        {synced.length > 0 && (
+          <section aria-label="Recently synced" className="jv-outbox__synced">
+            <h3 className="jv-label">Recently synced</h3>
+            <ul className="jv-outbox__list">
+              {synced.map((item) => (
+                <li key={item.clientId} className="jv-outbox__row">
+                  <div className="jv-outbox__main">
+                    <span className="jv-label jv-truncate">
+                      {summary(item)}
+                    </span>
+                    <span className="jv-caption jv-outbox__confirmed">
+                      <CloudCheck aria-hidden="true" size={13} />
+                      Saved to your journal{" "}
+                      {item.syncedAt
+                        ? formatDistanceToNow(new Date(item.syncedAt), {
+                            addSuffix: true,
+                          })
+                        : ""}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
       </AppAdaptiveDialog>
 

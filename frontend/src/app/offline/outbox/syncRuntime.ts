@@ -7,6 +7,7 @@ import {
   MediaUploadError,
   uploadMedia,
 } from "../../../features/editor/mediaUpload";
+import { toast } from "../../../components/ui/toast";
 import { outboxRepository } from "./outboxRepository";
 import { createSyncEngine, type SyncDeps, type SyncReport } from "./syncEngine";
 import { type SyncTriggers, startSyncTriggers } from "./syncTriggers";
@@ -66,6 +67,19 @@ export function realSyncDeps(): SyncDeps {
   };
 }
 
+/** Refreshes the timeline and confirms to the user when entries reached the server. */
+export function announceSync(queryClient: QueryClient, report: SyncReport) {
+  if (report.synced === 0) return;
+  void queryClient.invalidateQueries({ queryKey: queryKeys.allMoments });
+  toast.add({
+    title:
+      report.synced === 1
+        ? "1 entry saved to your journal"
+        : `${report.synced} entries saved to your journal`,
+    description: "They were written on this device and are now synced.",
+  });
+}
+
 let active: SyncTriggers | null = null;
 
 /** Starts syncing for the app's lifetime. Call once, after the first render. */
@@ -78,12 +92,7 @@ export function startOutboxSync(queryClient: QueryClient): SyncTriggers {
       await outboxRepository.pruneSynced(userId).catch(() => undefined);
       return engine.sync(userId);
     },
-    onReport: (report: SyncReport) => {
-      // New entries arrived on the server; refresh whatever the user is looking at.
-      if (report.synced > 0) {
-        void queryClient.invalidateQueries({ queryKey: queryKeys.allMoments });
-      }
-    },
+    onReport: (report) => announceSync(queryClient, report),
   });
   return active;
 }

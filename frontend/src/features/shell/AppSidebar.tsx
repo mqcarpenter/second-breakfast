@@ -15,7 +15,6 @@ import {
   LogOut,
   Monitor,
   Moon,
-  PenLine,
   Plus,
   RefreshCw,
   Settings,
@@ -33,7 +32,6 @@ import type {
   UserResponse,
 } from "../../api/generated/types.gen";
 import { signOut } from "../../api/auth/session";
-import { useBootMode } from "../../app/offline/offlineMode";
 import { useTheme, type ThemeMode } from "../../app/theme";
 import { Button } from "../../components/ui/button";
 import { IconButton } from "../../components/ui/icon-button";
@@ -45,6 +43,7 @@ import { useJournalLookup } from "../../lib/useJournalLookup";
 import { cx } from "../../lib/cx";
 import { startOidcLogout } from "../auth/oidc";
 import { QUICK_LOG_ENABLED, useShell } from "./shellContext";
+import { useNewEntryTarget } from "./useNewEntryTarget";
 import "./shell.css";
 import { ToggleGroup, ToggleGroupItem } from "../../components/ui/toggle-group";
 
@@ -63,7 +62,7 @@ export function AppSidebar({
   const { journals, isLoading, isError, refetch } = useJournalLookup();
   const navigate = useNavigate();
   const shell = useShell();
-  const offline = useBootMode() === "offline-restricted";
+  const deviceFirst = useNewEntryTarget() === "capture";
   // Where Settings was opened from, so closing it returns here (docs/features/settings.md).
   const fromHref = useRouterState({ select: (state) => state.location.href });
   // The rail lists active journals in the canonical order — favourites sort to
@@ -86,10 +85,18 @@ export function AppSidebar({
       <Button
         variant="brand"
         className="jv-nav__new"
-        disabled={offline}
-        title={offline ? "New entries need a connection" : undefined}
-        {...(offline
-          ? {}
+        title={
+          deviceFirst
+            ? "No connection to the server: this saves on your device and syncs later"
+            : undefined
+        }
+        {...(deviceFirst
+          ? {
+              onClick: () => {
+                onNavigate?.();
+                shell.openCapture();
+              },
+            }
           : {
               nativeButton: false,
               render: (
@@ -103,21 +110,6 @@ export function AppSidebar({
       >
         <Plus aria-hidden="true" size={16} />
         New entry
-      </Button>
-
-      {/* Capture writes to the device first and syncs later, so unlike
-          "New entry" it is available offline too. Outline, not brand: the one
-          filled brand control stays "New entry". */}
-      <Button
-        variant="outline"
-        className="jv-nav__capture"
-        onClick={() => {
-          onNavigate?.();
-          shell.openCapture();
-        }}
-      >
-        <PenLine aria-hidden="true" size={16} />
-        Capture
       </Button>
 
       {QUICK_LOG_ENABLED ? (

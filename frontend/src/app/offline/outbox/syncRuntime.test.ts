@@ -83,3 +83,45 @@ describe("ensureSession", () => {
     }
   });
 });
+
+describe("announceSync", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("refreshes the timeline and confirms to the user when entries synced", async () => {
+    const { announceSync } = await import("./syncRuntime");
+    const { toast } = await import("../../../components/ui/toast");
+    const add = vi.spyOn(toast, "add");
+    const invalidateQueries = vi.fn();
+    const report = {
+      outcome: "done",
+      synced: 2,
+      failed: 0,
+      remaining: 0,
+    } as const;
+    announceSync({ invalidateQueries } as never, report);
+    expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ["moments"] });
+    expect(add).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "2 entries saved to your journal" }),
+    );
+    add.mockClear();
+    announceSync({ invalidateQueries } as never, { ...report, synced: 1 });
+    expect(add).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "1 entry saved to your journal" }),
+    );
+  });
+
+  it("stays quiet when nothing synced", async () => {
+    const { announceSync } = await import("./syncRuntime");
+    const { toast } = await import("../../../components/ui/toast");
+    const add = vi.spyOn(toast, "add");
+    const invalidateQueries = vi.fn();
+    announceSync({ invalidateQueries } as never, {
+      outcome: "offline",
+      synced: 0,
+      failed: 0,
+      remaining: 2,
+    });
+    expect(invalidateQueries).not.toHaveBeenCalled();
+    expect(add).not.toHaveBeenCalled();
+  });
+});

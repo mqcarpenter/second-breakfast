@@ -87,12 +87,6 @@
   margin-bottom: var(--space-2);
 }
 
-/* Capture is the quieter sibling of New entry and closes that block of chrome. */
-.jv-nav__capture {
-  width: 100%;
-  margin-bottom: var(--space-4);
-}
-
 .jv-nav__quick-log {
   width: 100%;
   margin-bottom: var(--space-4);

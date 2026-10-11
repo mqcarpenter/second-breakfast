@@ -36,6 +36,8 @@ export function useOutbox() {
   return {
     items,
     pending,
+    /** Confirmed by the server within the retention window. */
+    synced: items.filter((item) => item.status === "synced"),
     failed: pending.filter((item) => item.status === "failed"),
     stale: pending.filter((item) => isStale(item, now)),
     refresh,

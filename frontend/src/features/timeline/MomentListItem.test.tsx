@@ -1,4 +1,4 @@
-import { fireEvent, render } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import type { MomentResponse } from "../../api/generated/types.gen";
@@ -129,5 +129,19 @@ describe("MomentListItem attachment tile", () => {
     expect(tile?.querySelector(".jv-moment__media-count")?.textContent).toBe(
       "+1",
     );
+  });
+
+  it("marks an entry that was synced from the device, and only that", () => {
+    const base = moment([]);
+    const { rerender } = render(
+      <MomentListItem
+        moment={{ ...base, client_id: "c-1" }}
+        selected={false}
+        search=""
+      />,
+    );
+    expect(screen.getByText("Synced from device")).toBeTruthy();
+    rerender(<MomentListItem moment={base} selected={false} search="" />);
+    expect(screen.queryByText("Synced from device")).toBeNull();
   });
 });

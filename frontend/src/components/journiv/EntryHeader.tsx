@@ -4,6 +4,7 @@ import type {
   MomentResponse,
 } from "../../api/generated/types.gen";
 import { formatDayLong, formatTimeOfDay } from "../../lib/datetime";
+import { DeviceOrigin } from "./DeviceOrigin";
 import { MomentMeta } from "./MomentMeta";
 import { JournalBadge } from "./JournalBadge";
 
@@ -74,6 +75,7 @@ export function EntryHeader({
           )}
         </>
       )}
+      <DeviceOrigin moment={moment} />
       {moment ? (
         <MomentMeta
           moment={moment}
