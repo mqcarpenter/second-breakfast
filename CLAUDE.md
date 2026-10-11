@@ -229,10 +229,11 @@ Build:
 
   ```sh
   docker compose --profile admin up -d admin-cli
-  docker compose exec admin-cli journiv-admin import-data /imports/<zip> -u <email> -s dayone --dry-run
-  docker compose exec admin-cli journiv-admin import-data /imports/<zip> -u <email> -s dayone
+  docker compose exec admin-cli python -m app.cli import import-data /imports/<zip> -u <email> -s dayone --max-entry-size-mb 80000 --dry-run
+  docker compose exec admin-cli python -m app.cli import import-data /imports/<zip> -u <email> -s dayone --max-entry-size-mb 80000
   ```
 
+- Lessons learned: run from `deploy/` (the repo root holds upstream's compose file). The default 50 GB size cap needs `--max-entry-size-mb`. Parsing happens after a full extraction, so first validate every journal JSON against `DayOneExport` straight from the zip (seconds, no extraction). After rebuilding, recreate the profile service with `docker compose --profile admin up -d --force-recreate admin-cli`, or it keeps the old image.
 - Disk: extraction plus media copy peak at about 3× the zip, about three times the zip size. Check free space first.
 - Expected counts are in `CLAUDE.local.md`. PDFs are skipped, because Journiv has no document media type.
 - **Done when:** the counts match, and a spot check of entries with photo, video, audio and location renders correctly.
