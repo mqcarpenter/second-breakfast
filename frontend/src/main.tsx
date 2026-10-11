@@ -25,6 +25,7 @@ import {
   initBootMode,
   subscribeBootMode,
 } from "./app/offline/offlineMode";
+import { startOutboxSync } from "./app/offline/outbox/syncRuntime";
 import { registerServiceWorker } from "./app/pwa/registerServiceWorker";
 import {
   registerOfflineCachePurge,
@@ -106,6 +107,11 @@ async function boot() {
   // After first render, not before: a registration competing with the boot
   // restore request above would slow down the launch the user sees.
   registerServiceWorker();
+
+  // Entries written offline wait in the outbox until the server is reachable.
+  // iOS has no Background Sync, so this runs at launch, on foreground, on the
+  // `online` event and on a timer (docs/features/pwa.md).
+  startOutboxSync(queryClient);
 }
 
 void boot();
