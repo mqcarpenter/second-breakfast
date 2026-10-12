@@ -136,6 +136,30 @@ describe("CaptureSheet", () => {
     expect(item?.text).toBe("");
   });
 
+  it("saves a typed place with the entry and remembers it for next time", async () => {
+    const user = userEvent.setup();
+    setup();
+    await ready();
+    await user.type(screen.getByLabelText("Entry"), "morning coffee");
+    await user.type(
+      screen.getByLabelText("Or name a place"),
+      "The Corner Cafe",
+    );
+    await user.click(screen.getByRole("button", { name: "Use this name" }));
+    await user.click(save());
+
+    await waitFor(async () =>
+      expect((await outboxRepository.list("u1")).length).toBe(1),
+    );
+    const [item] = await outboxRepository.list("u1");
+    expect(item?.place).toEqual({ name: "The Corner Cafe" });
+    expect(item?.latitude).toBeNull();
+    const remembered = JSON.parse(
+      window.localStorage.getItem("journiv:capture:places") ?? "[]",
+    );
+    expect(remembered[0].place.name).toBe("The Corner Cafe");
+  });
+
   it("explains when no journals are cached yet", async () => {
     vi.mocked(api.journals).mockResolvedValueOnce([]);
     setup();

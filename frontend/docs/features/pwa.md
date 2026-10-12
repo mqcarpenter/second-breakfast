@@ -317,6 +317,18 @@ saved (never on a blank launch). Before staging, `navigator.storage.estimate()`
 refuses a capture that cannot fit and warns past 80% of the quota
 (`storage.ts`); an unknown estimate never blocks writing.
 
+**Location.** Capture offers four ways to say where, so a place is never blocked
+on one service (`LocationField`): **Use my location** (device GPS; offline it
+saves coordinates, and the sync engine names the place through reverse geocoding
+when the entry is created -- best effort, a failed lookup leaves the coordinates);
+**name a place** (a typed label, no coordinates, works fully offline);
+**Search** (OpenStreetMap through the server's `/location/search`, only when
+pressed and only when a connection exists, because the query text leaves the
+network); and **Recent places** (up to 8 earlier captures, remembered in
+localStorage on the device, usable offline). The stored `location_json` uses only
+the backend's documented keys (name, locality, admin_area, country, timezone,
+latitude, longitude).
+
 **What the entry is.** The typed text becomes the Entry body; photos, video and
 audio attach to the Moment, exactly like voice notes and Quick Log media. They
 appear in the reader's gallery and can be placed in the body later with "Add to

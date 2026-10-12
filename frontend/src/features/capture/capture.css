@@ -175,3 +175,85 @@
   align-items: center;
   gap: 5px;
 }
+
+/* ---- location field ---------------------------------------------------------- */
+
+.jv-capture__place-picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.jv-capture__place {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  color: var(--foreground);
+}
+
+.jv-capture__results,
+.jv-capture__chips {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.jv-capture__results {
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.jv-capture__result {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--tap-target);
+  padding: 0 var(--space-3);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease);
+}
+
+.jv-capture__result:hover {
+  background: var(--muted);
+}
+
+.jv-capture__results li + li .jv-capture__result {
+  border-top: 1px solid var(--border);
+}
+
+.jv-capture__chips {
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.jv-capture__chip {
+  min-height: var(--tap-target);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  background: var(--card);
+  color: var(--foreground);
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease);
+}
+
+.jv-capture__chip:hover {
+  background: var(--muted);
+}
+
+.jv-capture__chip:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

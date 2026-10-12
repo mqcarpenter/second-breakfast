@@ -1,7 +1,12 @@
 import { type DBSchema, type IDBPDatabase, openDB } from "idb";
 import { uuid } from "../../../lib/uuid";
 import { applyEvent, type OutboxEvent } from "./stateMachine";
-import type { OutboxItem, OutboxMediaKind, OutboxMediaMeta } from "./types";
+import type {
+  OutboxItem,
+  OutboxMediaKind,
+  OutboxMediaMeta,
+  OutboxPlace,
+} from "./types";
 
 /**
  * Durable storage for the offline capture outbox.
@@ -132,6 +137,7 @@ export type EnqueueInput = {
   timezone: string;
   latitude?: number | null;
   longitude?: number | null;
+  place?: OutboxPlace | null;
   files: File[];
   /** Tests pin the id; production lets it default. */
   clientId?: string;
@@ -161,6 +167,7 @@ export const outboxRepository = {
       timezone: input.timezone,
       latitude: input.latitude ?? null,
       longitude: input.longitude ?? null,
+      place: input.place ?? null,
       media,
       status: "queued",
       attempts: 0,

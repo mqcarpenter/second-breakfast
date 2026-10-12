@@ -61,6 +61,18 @@ export function realSyncDeps(): SyncDeps {
     probe: probeServer,
     ensureSession,
     createMoment: async (body) => ({ id: (await api.createMoment(body)).id }),
+    resolvePlace: async (latitude, longitude) => {
+      const place = await api.reverseGeocode(latitude, longitude);
+      return place?.name
+        ? {
+            name: place.name,
+            locality: place.locality,
+            admin_area: place.admin_area,
+            country: place.country,
+            timezone: place.timezone,
+          }
+        : null;
+    },
     uploadFile: async (file, momentId) => ({
       id: (await uploadWithRefresh(file, momentId)).id,
     }),
