@@ -12,10 +12,11 @@ const shortcutIcons = [
 
 // Manifest colours are not scanned by npm run lint:design (raw colours are a
 // source-tree rule). Keep them mirroring the real tokens by hand:
-// src/styles/tokens.css `--background` -- oklch(1 0 0) light, oklch(0.205 0 0)
-// dark, resolved to sRGB via getComputedStyle in a real browser (do not trust
-// an eyeballed conversion — oklch does not map to hex by inspection).
-const LIGHT_BACKGROUND_HEX = "#ffffff";
+// src/styles/tron.css `--background` -- oklch(0.975 0.008 225) light,
+// oklch(0.16 0.03 255) dark (#050e1a, in index.html), converted to sRGB with the
+// standard OKLCH matrices (do not trust an eyeballed conversion — oklch does
+// not map to hex by inspection).
+const LIGHT_BACKGROUND_HEX = "#f1f8fb";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, ".", "JOURNIV_");

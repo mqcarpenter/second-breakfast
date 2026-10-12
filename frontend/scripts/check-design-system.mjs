@@ -24,6 +24,7 @@ const VALUE_LAYER = [
   "src/styles/base.css",
   "src/styles/prose.css",
   "src/styles/fonts.css",
+  "src/styles/tron.css",
   "src/styles/util.css",
 ];
 

@@ -2,9 +2,12 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/dm-sans";
+@import "@fontsource-variable/orbitron";
 
 @import "./tokens.css";
 @import "./fonts.css";
+/* Fork-only theme: token values over tokens.css, so it must come after it. */
+@import "./tron.css";
 /* Element resets go in the `base` layer so Tailwind utilities (e.g. the
    shadcn Button's `text-sm` / `font-medium` / `text-primary-foreground`) win
    over `button { font: inherit; color: inherit }`. Unlayered resets would beat

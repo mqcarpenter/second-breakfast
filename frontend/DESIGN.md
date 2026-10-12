@@ -49,6 +49,17 @@ general accent for badges, controls, charts, hover states, or selected
 backgrounds. User personalization may change the brand pair but must retain
 readable light and dark foregrounds.
 
+**This fork's theme.** `src/styles/tron.css` (loaded after `tokens.css`) overrides
+token *values* only, in the Tron (1982) palette: a near-black blue Grid with
+cyan as `--brand` and orange as `--destructive`, plus a pale "daylight Grid" light
+mode. Token names, roles and every rule above are unchanged -- brand cyan is still
+confined to the same four places. It also sets `--font-display` (bundled Orbitron,
+used only for display headings and the wordmark; reading prose keeps its own
+face) and a neon glow (`--glow-soft`, `--glow-strong`) that exists only in dark
+mode and only on the wordmark, the New entry action and the selection rail.
+`src/styles/tron.test.ts` measures the stylesheet and fails if any text/background
+pair drops under WCAG AA in either mode.
+
 ### The identity mark
 
 The logo is a distinct thing from that accent. `BrandMark`
