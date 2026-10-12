@@ -283,7 +283,7 @@ export function UsersPage() {
       <SettingsSection
         title="Users"
         titleId="users-title"
-        intro="Create accounts and manage access to this Journiv instance."
+        intro="Create accounts and manage access to this Trapper Keeper instance."
         action={
           <Button
             type="button"

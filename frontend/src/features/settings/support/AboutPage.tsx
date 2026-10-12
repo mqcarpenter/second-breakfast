@@ -45,8 +45,8 @@ export function AboutPage() {
   return (
     <div className="jv-settings__body">
       <SettingsSection
-        title="About Journiv"
-        intro="What this Journiv instance reports about itself."
+        title="About Trapper Keeper"
+        intro="What this Trapper Keeper instance reports about itself."
       >
         {version.data && (
           <>

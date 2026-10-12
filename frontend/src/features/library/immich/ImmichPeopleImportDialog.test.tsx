@@ -324,7 +324,7 @@ describe("Library · People · Import from Immich", () => {
     );
   });
 
-  it("links an Immich person to an existing Journiv person", async () => {
+  it("links an Immich person to an existing Trapper Keeper person", async () => {
     const user = makeUser();
     const dialog = await openDialog(user);
     await within(dialog).findByText("Ada Lovelace");
@@ -339,7 +339,7 @@ describe("Library · People · Import from Immich", () => {
     );
 
     await user.type(
-      within(dialog).getByLabelText("Link to Journiv person"),
+      within(dialog).getByLabelText("Link to Trapper Keeper person"),
       "Jane",
     );
     await user.click(await screen.findByRole("option", { name: "Jane Doe" }));
@@ -401,7 +401,7 @@ describe("Library · People · Import from Immich", () => {
           {
             external_person_id: "ext-bob",
             mode: "create",
-            error: "Immich person is already linked to a Journiv person",
+            error: "Immich person is already linked to a Trapper Keeper person",
           },
         ]),
       )

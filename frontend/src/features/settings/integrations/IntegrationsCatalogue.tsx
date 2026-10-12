@@ -49,7 +49,7 @@ export function IntegrationsCatalogue() {
     <div className="jv-settings__body">
       <SettingsSection
         title="Integrations"
-        intro="Connect Journiv to services you already run. Photos and videos you attach from a connected provider are handled by its import mode."
+        intro="Connect Trapper Keeper to services you already run. Photos and videos you attach from a connected provider are handled by its import mode."
       >
         <ul className="jv-integrations-list">
           {INTEGRATION_PROVIDERS.map((provider) => {

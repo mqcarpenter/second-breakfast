@@ -15,27 +15,26 @@ installed app's persistent login depends on.
 and is committed as `manifest.json` (not the plugin's default
 `manifest.webmanifest`) -- the backend's `NO_CACHE_FILENAMES`
 (`app/frontend.py`) already no-caches that exact filename, so a stale
-manifest can never survive a redeploy.
+manifest can never survive a redeploy. The installed app is named **Trapper
+Keeper** (`name` and `short_name`, and the iOS `apple-mobile-web-app-title`).
 
-Two icon families exist because Android's maskable mask would crop the
-identity mark's deliberately asymmetric tile (`DESIGN.md`, "The identity
-mark"):
+Every raster icon is generated from one master image,
+`brand/trapper-keeper-icon.png` (1024px, kept outside `public/` so it is not
+precached), by `npm run pwa:assets` (`scripts/generate-brand-icons.mjs`, using
+`sharp` and `sharp-ico`):
 
-- **`any`** -- `public/pwa-192x192.png` / `public/pwa-512x512.png`, generated
-  from `public/favicon.svg` (the same tile `BrandMark.tsx` renders), via
-  `pwa-assets.config.ts`.
-- **`maskable`** -- `public/pwa/maskable-icon-192x192.png` /
-  `.../512x512.png`, generated from a dedicated full-bleed source,
-  `public/pwa/maskable.svg`, via `pwa-assets.maskable.config.ts`. That source
-  is `#405DE6` edge-to-edge with the glyph pre-scaled to sit inside the
-  central 80% "safe zone" every platform mask respects -- the tile silhouette
-  is deliberately absent; the platform's mask supplies the shape.
+- **`any`** -- `public/pwa-192x192.png` / `public/pwa-512x512.png`. The 192 icon is
+  also what `BrandMark.tsx` renders in the UI and the favicon `<link>` and boot
+  splash use.
+- **`maskable`** -- `public/pwa/maskable-icon-192x192.png` / `.../512x512.png`.
+  The artwork is full-bleed with no transparency and its subject is centred, so
+  the same image serves; a platform mask only trims the corners.
+- **iOS home screen** -- `public/apple-touch-icon.png` (180px).
+- **`public/favicon.ico`** -- 16, 32 and 48px.
 
-Regenerate both with `npm run pwa:assets` (it runs both configs in sequence)
-whenever the mark's geometry changes, alongside `favicon.ico` and
-`apple-touch-icon.png` (`DESIGN.md`). Both preset files set `padding: 0` --
-the tool's 0.3 default would re-inset art that is already safe-zone-aware,
-shrinking the mark and adding an unwanted border.
+Regenerate all of them by replacing the master and running `npm run pwa:assets`.
+PNGs are palette-quantised (about 84 KB at 512px) because everything under
+`public/` is precached.
 
 Manifest colours (`theme_color`, `background_color`) are literal hex in
 `vite.config.ts`, commented with the token they mirror

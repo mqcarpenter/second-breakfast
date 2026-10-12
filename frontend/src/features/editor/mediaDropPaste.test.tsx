@@ -153,7 +153,7 @@ describe("paste sanitiser", () => {
     expect(serialized).toContain("more");
   });
 
-  it("keeps Journiv's own media when copied within the editor", () => {
+  it("keeps Trapper Keeper's own media when copied within the editor", () => {
     const { ref, quill } = mount();
     quill.clipboard.dangerouslyPasteHTML(
       0,

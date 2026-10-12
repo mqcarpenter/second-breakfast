@@ -139,22 +139,22 @@ export function AppSettingsPage() {
   }
 
   const installDescription = standalone
-    ? "Journiv is installed on this device."
+    ? "Trapper Keeper is installed on this device."
     : ios
       ? secureContext
         ? "On iPhone or iPad: tap Share, then Add to Home Screen."
         : "On iPhone or iPad: tap Share, then Add to Home Screen. This connection isn't secure because it doesn't use HTTPS, so the installed app won't work offline — only the online-only shortcut."
       : canPrompt
-        ? "Add Journiv to this device's home screen or app list for a faster launch and no browser chrome."
+        ? "Add Trapper Keeper to this device's home screen or app list for a faster launch and no browser chrome."
         : secureContext
-          ? "This browser doesn't currently offer installing Journiv."
-          : "Installing needs a secure (HTTPS) connection to this Journiv instance.";
+          ? "This browser doesn't currently offer installing Trapper Keeper."
+          : "Installing needs a secure (HTTPS) connection to this Trapper Keeper instance.";
 
   return (
     <div className="jv-settings__body">
       <SettingsSection
         title="Install & offline"
-        intro="Add Journiv to this device for a faster launch, its own icon, and no browser chrome."
+        intro="Add Trapper Keeper to this device for a faster launch, its own icon, and no browser chrome."
       >
         <SettingsRow label="Install" description={installDescription}>
           {!standalone && !ios && canPrompt ? (
@@ -163,7 +163,7 @@ export function AppSettingsPage() {
               disabled={prompting}
               onClick={() => void install()}
             >
-              Install Journiv
+              Install Trapper Keeper
             </Button>
           ) : null}
         </SettingsRow>

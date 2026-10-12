@@ -10,3 +10,10 @@ Licensed under PolyForm Noncommercial 1.0.0 (see `LICENSE.md`). Personal use onl
 
 Theme: Tron (1982), in `frontend/src/styles/tron.css` -- a token-value layer over
 `tokens.css`, so upstream token changes still merge cleanly.
+
+Product name and icon: the app is branded **Trapper Keeper**. The icon master is
+`frontend/brand/trapper-keeper-icon.png`; every raster icon is generated from it
+with `npm run pwa:assets`. Internal identifiers (CSS `jv-` classes, storage keys,
+database names, the `X-Journiv-Client` header) deliberately keep their upstream
+names so upstream merges stay clean.
+

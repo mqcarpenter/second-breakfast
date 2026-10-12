@@ -124,7 +124,7 @@ export const ACCENT_PRESETS: ReadonlyArray<{ label: string } & AccentPair> = [
     // default in tokens.css, so it has to reproduce it exactly. Those values
     // are hand-picked and verified (4.98:1 at the tightest), which is inside
     // AA but below the margin `pairFrom` holds out for. Keep the two in step.
-    label: "Journiv blue",
+    label: "Trapper Keeper blue",
     light: {
       brand: "oklch(0.545 0.192 269)",
       "brand-foreground": "oklch(0.985 0.003 269)",

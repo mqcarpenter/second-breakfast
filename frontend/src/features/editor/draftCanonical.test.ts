@@ -29,7 +29,7 @@ describe("durableMediaId", () => {
     expect(durableMediaId(`/api/v1/media/${PHOTO}/signed`)).toBe(PHOTO);
   });
 
-  it("refuses sources that are not Journiv media paths", () => {
+  it("refuses sources that are not Trapper Keeper media paths", () => {
     expect(durableMediaId("/media/holiday.jpg")).toBeNull();
     expect(durableMediaId("https://tracker.example.com/x.png")).toBeNull();
     expect(durableMediaId(`/api/v1/other/${PHOTO}/signed`)).toBeNull();

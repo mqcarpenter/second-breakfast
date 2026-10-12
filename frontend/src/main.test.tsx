@@ -10,7 +10,7 @@ describe("frontend entry point", () => {
     await import("./main");
 
     await waitFor(() => {
-      expect(root.textContent).toContain("Journiv");
+      expect(root.textContent).toContain("Trapper Keeper");
     });
   });
 });

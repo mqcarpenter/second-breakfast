@@ -287,7 +287,7 @@ describe("SignUpPage", () => {
 
     expect(
       await screen.findByText(
-        "Account creation isn’t available on this Journiv instance.",
+        "Account creation isn’t available on this Trapper Keeper instance.",
       ),
     ).toBeTruthy();
     expect((screen.getByLabelText("Name") as HTMLInputElement).value).toBe(
@@ -336,7 +336,7 @@ describe("SignUpPage", () => {
     ).toBeTruthy();
     expect(
       screen.getByText(
-        /administrator can enable sign up in the server configuration and restart Journiv/i,
+        /administrator can enable sign up in the server configuration and restart Trapper Keeper/i,
       ),
     ).toBeTruthy();
     expect(screen.queryByLabelText("Email")).toBeNull();
@@ -407,7 +407,7 @@ describe("signUpErrorMessage", () => {
       400,
       "We couldn’t create that account. Check your details or sign in if you already have one.",
     ],
-    [403, "Account creation isn’t available on this Journiv instance."],
+    [403, "Account creation isn’t available on this Trapper Keeper instance."],
     [422, "Check your account details and try again."],
     [429, "Too many account creation attempts. Wait a moment and try again."],
     [500, "We couldn’t create your account. Try again."],

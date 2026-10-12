@@ -96,7 +96,7 @@ function VersionManagement() {
     return (
       <SettingsSection
         title="Version checking"
-        intro="Keep this installation informed about Journiv releases."
+        intro="Keep this installation informed about Trapper Keeper releases."
         footer={
           <Button
             variant="secondary"
@@ -138,7 +138,7 @@ function VersionManagement() {
   return (
     <SettingsSection
       title="Version checking"
-      intro="Manage release checks for this Journiv installation."
+      intro="Manage release checks for this Trapper Keeper installation."
       footer={
         <Button
           variant="default"
@@ -183,7 +183,7 @@ function VersionManagement() {
         htmlFor="automatic-version-checking"
         description={
           enabled.data.enabled
-            ? "Journiv checks for updates automatically."
+            ? "Trapper Keeper checks for updates automatically."
             : "Automatic checks are off. You can still check manually."
         }
       >
@@ -218,8 +218,8 @@ function VersionManagement() {
         ) : null}
         {feedback === "failed" ? (
           <FieldError>
-            Journiv couldn’t check for updates. The cached version details are
-            still shown above.
+            Trapper Keeper couldn’t check for updates. The cached version
+            details are still shown above.
           </FieldError>
         ) : null}
       </SettingsRow>

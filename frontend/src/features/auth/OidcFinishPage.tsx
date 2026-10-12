@@ -71,7 +71,7 @@ export function OidcFinishPage() {
       lede={
         <p className="jv-auth__lede jv-auth__status" role="status">
           <Spinner aria-hidden />
-          Establishing your Journiv session…
+          Establishing your Trapper Keeper session…
         </p>
       }
     />

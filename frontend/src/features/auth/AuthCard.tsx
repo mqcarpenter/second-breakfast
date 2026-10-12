@@ -25,7 +25,11 @@ export function AuthCard({
     <main className="jv-auth">
       <Card className="jv-auth__card" aria-busy={busy || undefined}>
         <CardHeader className="jv-auth__header">
-          <BrandMark size={48} title="Journiv" className="jv-auth__brand" />
+          <BrandMark
+            size={48}
+            title="Trapper Keeper"
+            className="jv-auth__brand"
+          />
           <CardTitle>
             <h1 className="jv-display">{heading}</h1>
           </CardTitle>

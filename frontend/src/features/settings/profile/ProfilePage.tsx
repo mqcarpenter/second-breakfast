@@ -84,7 +84,7 @@ export function ProfilePage() {
     >
       <SettingsSection
         title="Personal information"
-        intro="How you appear in Journiv, and the timezone new moments are stamped with."
+        intro="How you appear in Trapper Keeper, and the timezone new moments are stamped with."
       >
         <div className="jv-settings__identity">
           <Avatar className="jv-settings__avatar" aria-hidden="true">

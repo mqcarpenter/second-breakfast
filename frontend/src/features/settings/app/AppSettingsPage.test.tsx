@@ -63,7 +63,7 @@ describe("AppSettingsPage", () => {
     render(<AppSettingsPage />);
     fireBeforeInstallPrompt();
     expect(
-      await screen.findByRole("button", { name: "Install Journiv" }),
+      await screen.findByRole("button", { name: "Install Trapper Keeper" }),
     ).toBeTruthy();
   });
 

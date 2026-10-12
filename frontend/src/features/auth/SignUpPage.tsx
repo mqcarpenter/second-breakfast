@@ -29,7 +29,7 @@ export function signUpErrorMessage(error: unknown): string {
   if (error.status === 400)
     return "We couldn’t create that account. Check your details or sign in if you already have one.";
   if (error.status === 403)
-    return "Account creation isn’t available on this Journiv instance.";
+    return "Account creation isn’t available on this Trapper Keeper instance.";
   if (error.status === 422) return "Check your account details and try again.";
   if (error.status === 429)
     return "Too many account creation attempts. Wait a moment and try again.";
@@ -137,7 +137,7 @@ export function SignUpPage() {
     return (
       <AuthCard
         heading="Sign up unavailable"
-        lede="Journiv couldn’t check whether this instance accepts new accounts."
+        lede="Trapper Keeper couldn’t check whether this instance accepts new accounts."
       >
         <Button variant="default" onClick={() => void instanceConfig.refetch()}>
           Try again
@@ -156,7 +156,7 @@ export function SignUpPage() {
     return (
       <AuthCard
         heading="Create or access your account"
-        lede="This Journiv instance uses single sign-on. Your administrator controls whether your identity provider account can create a new Journiv account."
+        lede="This Trapper Keeper instance uses single sign-on. Your administrator controls whether your identity provider account can create a new Trapper Keeper account."
       >
         <OidcAction returnTo={returnTo} primary />
       </AuthCard>
@@ -168,7 +168,7 @@ export function SignUpPage() {
       return (
         <AuthCard
           heading="Password sign up is disabled"
-          lede="You can still continue with single sign-on. Your administrator controls whether new Journiv accounts are created through the identity provider."
+          lede="You can still continue with single sign-on. Your administrator controls whether new Trapper Keeper accounts are created through the identity provider."
         >
           <OidcAction returnTo={returnTo} primary />
           <p className="jv-auth__alternate jv-caption">
@@ -183,7 +183,7 @@ export function SignUpPage() {
     return (
       <AuthCard
         heading="Sign up is disabled"
-        lede="This Journiv instance is not accepting new accounts. An administrator can enable sign up in the server configuration and restart Journiv."
+        lede="This Trapper Keeper instance is not accepting new accounts. An administrator can enable sign up in the server configuration and restart Trapper Keeper."
       >
         <Link
           className={buttonVariants({ variant: "default" })}

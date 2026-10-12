@@ -249,7 +249,7 @@ export function TagDetailPage() {
               description={
                 plus.available
                   ? "Supporter licences unlock usage trends, peak months and growth for every tag."
-                  : "This Journiv instance was built without the Plus features module."
+                  : "This Trapper Keeper instance was built without the Plus features module."
               }
               action={
                 plus.available ? (

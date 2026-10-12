@@ -1635,7 +1635,7 @@ function EditorLoadError({
         // here is the difference between a wait and a loss.
         description={
           draftIsSafe
-            ? "Your unsaved writing for this entry is still stored on this device and will be offered back once Journiv can be reached."
+            ? "Your unsaved writing for this entry is still stored on this device and will be offered back once Trapper Keeper can be reached."
             : undefined
         }
         action={

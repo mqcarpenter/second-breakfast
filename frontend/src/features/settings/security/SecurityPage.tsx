@@ -71,7 +71,7 @@ function PasswordForm({ email }: { email: string }) {
     >
       <SettingsSection
         title="Password"
-        intro="Change the password you use to sign in to Journiv."
+        intro="Change the password you use to sign in to Trapper Keeper."
       >
         {form.succeeded && (
           <Alert role="status">
@@ -171,8 +171,8 @@ function OidcNotice({ ssoEnabled }: { ssoEnabled: boolean }) {
         <Alert>
           <AlertDescription>
             {ssoEnabled
-              ? "You sign in to Journiv through your identity provider. Manage your password with that provider."
-              : "This account signs in through an external identity provider, so there is no Journiv password to change."}
+              ? "You sign in to Trapper Keeper through your identity provider. Manage your password with that provider."
+              : "This account signs in through an external identity provider, so there is no Trapper Keeper password to change."}
           </AlertDescription>
         </Alert>
       </SettingsSection>

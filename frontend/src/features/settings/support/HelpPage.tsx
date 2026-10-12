@@ -63,7 +63,8 @@ export function HelpPage() {
               <ItemContent>
                 <ItemTitle>Use legacy interface</ItemTitle>
                 <ItemDescription>
-                  Temporarily switch back to the previous Journiv interface.
+                  Temporarily switch back to the previous Trapper Keeper
+                  interface.
                 </ItemDescription>
               </ItemContent>
               <ItemActions>

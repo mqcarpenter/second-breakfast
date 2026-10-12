@@ -68,7 +68,7 @@ describe("inline media fixtures", () => {
     expect(hasUnsupportedEmbed(hydrated)).toBe(false);
   });
 
-  it("still refuses embed kinds Journiv does not render", () => {
+  it("still refuses embed kinds Trapper Keeper does not render", () => {
     const formula = {
       ops: [{ insert: { formula: "/api/v1/x" } }, { insert: "\n" }],
     };

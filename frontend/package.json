@@ -27,7 +27,7 @@
     "api:pull": "node scripts/pull-openapi.mjs",
     "api:generate": "openapi-ts",
     "api:check": "node scripts/check-generated.mjs",
-    "pwa:assets": "pwa-assets-generator && pwa-assets-generator -c pwa-assets.maskable.config.ts"
+    "pwa:assets": "node scripts/generate-brand-icons.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.7.0",

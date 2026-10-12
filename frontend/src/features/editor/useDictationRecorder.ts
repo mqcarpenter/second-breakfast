@@ -34,7 +34,7 @@ export type DictationError = { kind: DictationErrorKind; message: string };
 
 const MESSAGES: Record<DictationErrorKind, string> = {
   "insecure-context":
-    "Voice notes need a secure connection. Open Journiv over HTTPS (or on localhost) to record.",
+    "Voice notes need a secure connection. Open Trapper Keeper over HTTPS (or on localhost) to record.",
   unsupported: "This browser can’t record audio here.",
   "permission-denied":
     "Microphone access is blocked. Allow the microphone for this site in your browser settings, then try again.",

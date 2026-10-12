@@ -311,7 +311,7 @@ export function ImmichPeopleImportDialog({
       open={open}
       onOpenChange={handleOpenChange}
       title="Import people from Immich"
-      description="Create Journiv people from the faces Immich has identified, or link them to people you already have."
+      description="Create Trapper Keeper people from the faces Immich has identified, or link them to people you already have."
       size="lg"
       footer={
         <>
@@ -555,7 +555,7 @@ function LinkPersonPicker({
       disabled={loading}
     >
       <ComboboxInput
-        aria-label="Link to Journiv person"
+        aria-label="Link to Trapper Keeper person"
         placeholder={loading ? "Loading people…" : "Search people…"}
       />
       <ComboboxContent>

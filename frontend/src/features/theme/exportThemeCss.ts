@@ -23,7 +23,8 @@ export function exportThemeCss(theme: UserTheme): string {
     fontNotes.push(`editor font: ${FONTS[theme.editorFont].label}`);
   if (theme.editorFontScale != null)
     fontNotes.push(`text size: ${theme.editorFontScale}`);
-  if (fontNotes.length) parts.push(`/* Journiv — ${fontNotes.join(", ")} */`);
+  if (fontNotes.length)
+    parts.push(`/* Trapper Keeper — ${fontNotes.join(", ")} */`);
 
   const light = block(":root", theme.light);
   const dark = block(".dark", theme.dark);

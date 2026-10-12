@@ -198,7 +198,7 @@ export function UserForm({
               </SelectContent>
             </Select>
             <FieldDescription>
-              Administrators can manage every Journiv account.
+              Administrators can manage every Trapper Keeper account.
             </FieldDescription>
           </Field>
 

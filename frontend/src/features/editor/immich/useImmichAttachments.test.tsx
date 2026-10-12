@@ -230,7 +230,7 @@ describe("useImmichAttachments", () => {
     );
   });
 
-  it("skips assets Journiv cannot inline", async () => {
+  it("skips assets Trapper Keeper cannot inline", async () => {
     const { hook, handle } = setup();
     await act(async () => {
       await hook.result.current.attach([asset("aud", { type: "AUDIO" })]);

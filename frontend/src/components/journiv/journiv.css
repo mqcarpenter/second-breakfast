@@ -418,6 +418,8 @@
 .jv-brand-mark {
   display: block;
   flex: 0 0 auto;
+  border-radius: 22%;
+  object-fit: cover;
 }
 
 .jv-brand-lockup {

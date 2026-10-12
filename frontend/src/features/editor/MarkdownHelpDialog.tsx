@@ -34,7 +34,7 @@ export function MarkdownHelpDialog({
       open={open}
       onOpenChange={onOpenChange}
       title="Markdown shortcuts"
-      description="Type these while writing and Journiv formats the text for you. Undo once to get the characters back."
+      description="Type these while writing and Trapper Keeper formats the text for you. Undo once to get the characters back."
       size="sm"
     >
       <dl className="jv-markdown-help">

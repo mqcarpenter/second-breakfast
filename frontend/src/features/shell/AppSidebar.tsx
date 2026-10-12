@@ -81,7 +81,7 @@ export function AppSidebar({
       {/* Styled as a button, never as a nav item: it must not pick up the
           selected-route treatment. That regression made it unreadable before.
           This is the product's one filled brand control (DESIGN.md, brand
-          use #1) — writing is the thing Journiv exists for. */}
+          use #1) — writing is the thing Trapper Keeper exists for. */}
       <Button
         variant="brand"
         className="jv-nav__new"
@@ -248,7 +248,7 @@ export function AppSidebar({
           ) : (
             <div className="jv-nav__account-text">
               <span className="jv-label jv-truncate">
-                {user?.name || "Journiv"}
+                {user?.name || "Trapper Keeper"}
               </span>
               <span className="jv-caption jv-truncate">{user?.email}</span>
             </div>

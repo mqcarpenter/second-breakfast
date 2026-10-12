@@ -62,20 +62,20 @@ pair drops under WCAG AA in either mode.
 
 ### The identity mark
 
-The logo is a distinct thing from that accent. `BrandMark`
-([src/components/journiv/BrandMark.tsx](src/components/journiv/BrandMark.tsx)) —
-a Georgia-Italic `j` in an asymmetric rounded tile — is the product's fixed
-identity: the tile is the literal hex `#405DE6` and the glyph is white, baked
-into the SVG, and it stays that colour in dark mode and under every user
-accent. `--brand` / `--brand-foreground` are the *customisable* UI accent and
-must never colour the mark; equally the mark's raw hex must not appear anywhere
-else. It sits in the sidebar next to the "Journiv" wordmark (which carries the
-name, so the SVG is `aria-hidden`), and centred and enlarged above the heading
-on the auth card, where it stands alone and takes an `aria-label` instead. The
-same geometry ships pixel-identical everywhere the mark appears — favicon,
-touch icon, and PWA install assets; see
-[`docs/features/pwa.md`](docs/features/pwa.md) for that asset inventory and
-how to regenerate it.
+The product is named **Trapper Keeper** in this fork, and its mark is the app
+icon: a single full-bleed image (`brand/trapper-keeper-icon.png`, neon triangles
+over a checker and leopard-print field). `BrandMark`
+([src/components/journiv/BrandMark.tsx](src/components/journiv/BrandMark.tsx))
+renders it as a rounded square beside the wordmark. It is a fixed identity, not
+chrome: being an image it stays exactly as drawn in dark mode and under every
+user accent. `--brand` / `--brand-foreground` are the *customisable* UI accent and
+must never colour the mark. It sits in the sidebar next to the wordmark (which
+carries the name, so the image is decorative, `alt=""`), and centred and enlarged
+above the heading on the auth card, where it stands alone and takes an accessible
+name instead. The same artwork ships everywhere the mark appears -- favicon,
+touch icon and PWA install assets -- all generated from the one master by
+`npm run pwa:assets` (`scripts/generate-brand-icons.mjs`); see
+[`docs/features/pwa.md`](docs/features/pwa.md) for that inventory.
 
 The only extra roles are line-strong, danger-surface, danger-border, success,
 and theme-independent on-media values. They derive from semantic roles where

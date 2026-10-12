@@ -143,8 +143,8 @@ export function DraftMediaUnreachable({
         description={
           <>
             The writing below is stored on this device, shown here as it was
-            left. Journiv cannot reach the server to restore the photos or
-            recordings in it, so editing stays closed until it can — opening
+            left. Trapper Keeper cannot reach the server to restore the photos
+            or recordings in it, so editing stays closed until it can — opening
             without them and saving would remove them from this entry. Try again
             once you are back online.
           </>
@@ -187,14 +187,14 @@ export function DraftMediaUnreachable({
 export function localDraftFailureMessage(status: DraftStatus): string | null {
   switch (status) {
     case "failed":
-      return "Journiv couldn’t keep a local copy of this writing. Press Done before leaving this page.";
+      return "Trapper Keeper couldn’t keep a local copy of this writing. Press Done before leaving this page.";
     case "unavailable":
       return "This browser won’t keep a local copy. Press Done before leaving this page.";
     case "unsupported":
       // Nothing was stored, and the line must not imply otherwise. This entry
       // holds something a draft cannot represent, and a partial copy would lose
       // it on recovery.
-      return "Journiv can’t keep a local copy of this entry — it contains something this editor cannot store safely. Press Done before leaving this page.";
+      return "Trapper Keeper can’t keep a local copy of this entry — it contains something this editor cannot store safely. Press Done before leaving this page.";
     default:
       return null;
   }

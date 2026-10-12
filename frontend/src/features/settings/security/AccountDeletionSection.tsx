@@ -59,7 +59,7 @@ export function AccountDeletionSection() {
     <>
       <SettingsSection
         title="Delete account"
-        intro="Permanently remove your account and everything stored in Journiv."
+        intro="Permanently remove your account and everything stored in Trapper Keeper."
         footer={
           <Button
             type="button"
@@ -80,7 +80,7 @@ export function AccountDeletionSection() {
         open={open}
         onOpenChange={close}
         title="Delete your account?"
-        description="This permanently deletes your Journiv account and everything stored in it. This action cannot be undone."
+        description="This permanently deletes your Trapper Keeper account and everything stored in it. This action cannot be undone."
         size="md"
         dismissible={!deleting}
         footer={

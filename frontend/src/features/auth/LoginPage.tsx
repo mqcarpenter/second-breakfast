@@ -62,7 +62,7 @@ export function LoginPage() {
         lede={
           <p className="jv-auth__lede jv-auth__status" role="status">
             <Spinner aria-hidden />
-            Checking how this Journiv instance accepts sign-ins…
+            Checking how this Trapper Keeper instance accepts sign-ins…
           </p>
         }
       />
@@ -73,7 +73,7 @@ export function LoginPage() {
     return (
       <AuthCard
         heading="Sign in unavailable"
-        lede="Journiv couldn’t check the sign-in methods available on this instance."
+        lede="Trapper Keeper couldn’t check the sign-in methods available on this instance."
       >
         <Button variant="default" onClick={() => void instanceConfig.refetch()}>
           Try again
@@ -88,7 +88,7 @@ export function LoginPage() {
     return (
       <AuthCard
         heading="Welcome back"
-        lede="This Journiv instance uses single sign-on. Continue with your identity provider to access your journal."
+        lede="This Trapper Keeper instance uses single sign-on. Continue with your identity provider to access your journal."
       >
         <OidcAction returnTo={returnTo} primary />
       </AuthCard>
@@ -152,7 +152,7 @@ export function LoginPage() {
 
       {!disable_signup && (
         <p className="jv-auth__alternate jv-caption">
-          New to Journiv?{" "}
+          New to Trapper Keeper?{" "}
           <Link to="/signup" search={{ returnTo }}>
             Create an account
           </Link>

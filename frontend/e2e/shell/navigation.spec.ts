@@ -90,7 +90,9 @@ test.describe("tablet shell navigation", () => {
 
     await openNavigation.click();
 
-    const drawer = page.getByRole("dialog", { name: "Journiv navigation" });
+    const drawer = page.getByRole("dialog", {
+      name: "Trapper Keeper navigation",
+    });
     await expect(drawer).toBeVisible();
     await expect(
       drawer.getByRole("navigation", { name: "Views" }),

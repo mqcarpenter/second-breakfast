@@ -202,7 +202,7 @@ describe("Settings routing and modal", () => {
     ["/settings/data/import", "Import", "Import"],
     ["/settings/data/export", "Export", "Export"],
     ["/settings/support/help", "Help & feedback", "Help & feedback"],
-    ["/settings/support/about", "About Journiv", "About"],
+    ["/settings/support/about", "About Trapper Keeper", "About"],
   ])("opens %s and marks its nav item active", async (path, heading, link) => {
     await renderRoute(path);
     const dialog = await screen.findByRole("dialog");

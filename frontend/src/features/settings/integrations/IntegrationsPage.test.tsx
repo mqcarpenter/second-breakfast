@@ -252,7 +252,7 @@ describe("Settings · Integrations · Immich detail", () => {
 
     await userEvent.type(key, "immich-key-123");
     await userEvent.click(
-      page.getByRole("radio", { name: /Copy into Journiv/ }),
+      page.getByRole("radio", { name: /Copy into Trapper Keeper/ }),
     );
     expect((connect as HTMLButtonElement).disabled).toBe(false);
     await userEvent.click(connect);
@@ -290,7 +290,7 @@ describe("Settings · Integrations · Immich detail", () => {
     expect(page.queryByLabelText("API key")).toBeNull();
 
     await userEvent.click(
-      page.getByRole("radio", { name: /Copy into Journiv/ }),
+      page.getByRole("radio", { name: /Copy into Trapper Keeper/ }),
     );
     expect((save as HTMLButtonElement).disabled).toBe(false);
     await userEvent.click(save);

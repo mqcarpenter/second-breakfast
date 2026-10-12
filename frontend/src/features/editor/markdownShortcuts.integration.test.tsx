@@ -190,7 +190,7 @@ describe("markdown shortcuts in the writing surface", () => {
     });
   });
 
-  describe("list markers are Quill's, narrowed to what Journiv stores", () => {
+  describe("list markers are Quill's, narrowed to what Trapper Keeper stores", () => {
     it("makes `- `, `* `, `1. `, `[ ] ` and `[x] ` lists that round-trip", async () => {
       for (const [typed, list] of [
         ["- one", "bullet"],

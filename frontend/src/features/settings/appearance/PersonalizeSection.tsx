@@ -60,7 +60,7 @@ export function PersonalizeSection() {
   return (
     <SettingsSection
       title="Personalize"
-      intro="Colour, fonts and reading size for this device. Import a shadcn or tweakcn theme, or reset to the Journiv defaults."
+      intro="Colour, fonts and reading size for this device. Import a shadcn or tweakcn theme, or reset to the Trapper Keeper defaults."
     >
       <SettingsRow
         label="Accent colour"
@@ -217,7 +217,7 @@ export function PersonalizeSection() {
 
       <SettingsRow label="Reset">
         <Button variant="ghost" onClick={p.reset}>
-          Reset to Journiv default
+          Reset to Trapper Keeper default
         </Button>
       </SettingsRow>
     </SettingsSection>

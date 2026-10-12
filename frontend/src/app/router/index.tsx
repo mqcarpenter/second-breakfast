@@ -264,7 +264,7 @@ const rootRoute = createRootRoute({
       <StatusView
         icon={<Compass size={22} />}
         title="Page not found"
-        description="The Journiv page you requested does not exist."
+        description="The Trapper Keeper page you requested does not exist."
       />
     </main>
   ),

@@ -34,13 +34,13 @@ const MODE_OPTIONS: {
     value: "link_only",
     label: "Link originals",
     description:
-      "Journiv stores a reference. Photos and videos stay in Immich and are streamed on demand.",
+      "Trapper Keeper stores a reference. Photos and videos stay in Immich and are streamed on demand.",
   },
   {
     value: "copy",
-    label: "Copy into Journiv",
+    label: "Copy into Trapper Keeper",
     description:
-      "Journiv downloads a copy of each attached file into its own storage.",
+      "Trapper Keeper downloads a copy of each attached file into its own storage.",
   },
 ];
 
@@ -110,7 +110,7 @@ export function ImmichConnectForm({
     <div className="jv-settings__body">
       <SettingsSection
         title="Immich"
-        intro="Connect Journiv to the Immich server this instance provides. Once connected you can attach photos and videos from your Immich library while writing."
+        intro="Connect Trapper Keeper to the Immich server this instance provides. Once connected you can attach photos and videos from your Immich library while writing."
         footer={
           <>
             {state.connected && (
@@ -263,7 +263,7 @@ export function ImmichConnectForm({
         open={disconnectOpen}
         onOpenChange={setDisconnectOpen}
         title="Disconnect Immich?"
-        description="Journiv will stop accessing this provider. Entries that already link Immich media keep working; copied media is unaffected."
+        description="Trapper Keeper will stop accessing this provider. Entries that already link Immich media keep working; copied media is unaffected."
         confirmLabel="Disconnect"
         destructive
         pending={disconnect.isPending}

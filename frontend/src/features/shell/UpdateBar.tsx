@@ -31,7 +31,7 @@ export function UpdateBar() {
     <>
       <div className="jv-update-bar" role="status">
         <span className="text-sm text-foreground">
-          A new version of Journiv is ready.
+          A new version of Trapper Keeper is ready.
         </span>
         <div className="jv-update-bar__actions">
           <Button variant="outline" size="sm" onClick={restart}>

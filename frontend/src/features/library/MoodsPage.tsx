@@ -688,8 +688,8 @@ function MoodFormDialog({
               <option value={1}>1 — Very negative</option>
             </NativeSelect>
             <FieldDescription>
-              The score determines whether Journiv categorises this mood as
-              positive, neutral or negative.
+              The score determines whether Trapper Keeper categorises this mood
+              as positive, neutral or negative.
             </FieldDescription>
           </Field>
           <FieldSet>

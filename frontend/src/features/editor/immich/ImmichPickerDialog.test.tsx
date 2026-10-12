@@ -122,7 +122,7 @@ describe("ImmichPickerDialog", () => {
 
   it("explains link mode and copy mode", async () => {
     setup({ importMode: "copy" });
-    expect(await screen.findByText(/copied into Journiv/i)).toBeTruthy();
+    expect(await screen.findByText(/copied into Trapper Keeper/i)).toBeTruthy();
   });
 
   it("defaults a disconnected picker to the device tab", async () => {

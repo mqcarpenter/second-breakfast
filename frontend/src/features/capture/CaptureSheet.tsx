@@ -257,7 +257,8 @@ export function CaptureSheet({
           {!isLoading && active.length === 0 ? (
             <p className="jv-capture__error" role="alert">
               Your journals aren&rsquo;t available on this device yet. Open
-              Journiv once while connected, then capture will work anywhere.
+              Trapper Keeper once while connected, then capture will work
+              anywhere.
             </p>
           ) : (
             <div className="jv-capture__field">

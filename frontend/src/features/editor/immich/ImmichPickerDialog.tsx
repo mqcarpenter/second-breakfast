@@ -76,8 +76,8 @@ export function ImmichPickerDialog({
   const description =
     tab === "immich"
       ? importMode === "copy"
-        ? "Files you add are copied into Journiv."
-        : "Files stay in Immich; Journiv links to them."
+        ? "Files you add are copied into Trapper Keeper."
+        : "Files stay in Immich; Trapper Keeper links to them."
       : "Choose photos, videos or audio from this device.";
 
   const tabs = (

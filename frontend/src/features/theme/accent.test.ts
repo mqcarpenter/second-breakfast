@@ -28,7 +28,7 @@ function oklch(value: string | undefined): Oklch {
 describe("curated accent presets", () => {
   it("offers a stable set of named presets", () => {
     expect(ACCENT_PRESETS.map((preset) => preset.label)).toEqual([
-      "Journiv blue",
+      "Trapper Keeper blue",
       "Indigo",
       "Violet",
       "Teal",

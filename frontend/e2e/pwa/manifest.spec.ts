@@ -11,7 +11,7 @@ test.describe("web app manifest", () => {
     expect(response.headers()["cache-control"]).toContain("no-cache");
 
     const manifest = await response.json();
-    expect(manifest.name).toBe("Journiv");
+    expect(manifest.name).toBe("Trapper Keeper");
     expect(manifest.display).toBe("standalone");
     expect(manifest.id).toBe("/");
 

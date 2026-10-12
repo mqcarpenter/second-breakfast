@@ -189,7 +189,7 @@ describe("QuillReader", () => {
     expect(editor.querySelector("audio")?.getAttribute("src")).toBe(SIGNED);
   });
 
-  it("falls back for embed kinds Journiv does not render", () => {
+  it("falls back for embed kinds Trapper Keeper does not render", () => {
     render(
       <QuillReader
         content={{ ops: [{ insert: { formula: "x" } }, { insert: "\n" }] }}

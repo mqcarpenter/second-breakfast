@@ -11,7 +11,7 @@ import {
 } from "./deltaProfile";
 import { CANONICAL_DELTA_FIXTURES } from "./fixtures";
 
-describe("Journiv Delta profile", () => {
+describe("Trapper Keeper Delta profile", () => {
   it("accepts and safely clones every canonical fixture", () => {
     for (const [, fixture] of CANONICAL_DELTA_FIXTURES) {
       expect(isQuillDocumentDelta(fixture)).toBe(true);
