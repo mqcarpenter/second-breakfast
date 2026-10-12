@@ -22,6 +22,16 @@ export type OutboxMediaMeta = {
   uploadedMediaId: string | null;
 };
 
+/** A named place. Keys mirror the documented `location_json` the backend stores
+ *  (name, locality, admin_area, country, timezone); coordinates live on the item. */
+export type OutboxPlace = {
+  name: string;
+  locality?: string | null;
+  admin_area?: string | null;
+  country?: string | null;
+  timezone?: string | null;
+};
+
 export type OutboxItem = {
   /** The client-generated idempotency key, sent as `client_id`. Also the primary key. */
   clientId: string;
@@ -32,6 +42,8 @@ export type OutboxItem = {
   timezone: string;
   latitude: number | null;
   longitude: number | null;
+  /** Optional: items queued before places existed do not have it. */
+  place?: OutboxPlace | null;
   media: OutboxMediaMeta[];
   status: OutboxStatus;
   /** Sync attempts since the last manual retry. */

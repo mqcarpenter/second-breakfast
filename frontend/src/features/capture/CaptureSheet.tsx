@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { FileAudio, ImagePlus, MapPin, Mic, Square, X } from "lucide-react";
+import { FileAudio, ImagePlus, Mic, Square, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { sessionStore } from "../../api/auth/session";
 import { queryKeys } from "../../api/query/keys";
@@ -26,6 +26,8 @@ import { useJournalLookup } from "../../lib/useJournalLookup";
 import { formatDuration } from "../editor/dictationFormat";
 import { mediaKindForMime } from "../../app/offline/outbox/outboxRepository";
 import { uuid } from "../../lib/uuid";
+import { type CaptureLocation, LocationField } from "./LocationField";
+import { rememberPlace } from "./recentPlaces";
 import { useAudioCapture } from "./useAudioCapture";
 import "./capture.css";
 
@@ -44,26 +46,6 @@ function rememberJournal(id: string) {
   } catch {
     // A per-viewer convenience only.
   }
-}
-
-type Coordinates = { latitude: number; longitude: number };
-
-function readLocation(): Promise<Coordinates> {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      reject(new Error("unsupported"));
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (position) =>
-        resolve({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        }),
-      reject,
-      { timeout: 10_000, maximumAge: 60_000 },
-    );
-  });
 }
 
 /**
@@ -103,8 +85,7 @@ export function CaptureSheet({
     Array<{ id: string; file: File }>
   >([]);
   const files = useMemo(() => attachments.map((a) => a.file), [attachments]);
-  const [location, setLocation] = useState<Coordinates | null>(null);
-  const [locating, setLocating] = useState(false);
+  const [location, setLocation] = useState<CaptureLocation | null>(null);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
@@ -160,18 +141,6 @@ export function CaptureSheet({
     [busy, hasContent, audio.recording, onOpenChange],
   );
 
-  const addLocation = async () => {
-    setError("");
-    setLocating(true);
-    try {
-      setLocation(await readLocation());
-    } catch {
-      setError("Couldn't get your location. Check that location access is on.");
-    } finally {
-      setLocating(false);
-    }
-  };
-
   const save = async () => {
     if (!ready || !userId || !journalId) return;
     setError("");
@@ -193,9 +162,11 @@ export function CaptureSheet({
         timezone: browserTimeZone(),
         latitude: location?.latitude,
         longitude: location?.longitude,
+        place: location?.place.name ? location.place : null,
         files,
       });
       rememberJournal(journalId);
+      if (location?.place.name) rememberPlace(location);
       // Real data exists now, so asking the browser not to evict it is meaningful.
       void requestPersistence();
       toast.add({
@@ -399,34 +370,11 @@ export function CaptureSheet({
 
           <div className="jv-capture__field">
             <span className="jv-label">Location</span>
-            {location ? (
-              <div className="jv-capture__location">
-                <span className="jv-caption">
-                  {location.latitude.toFixed(4)},{" "}
-                  {location.longitude.toFixed(4)}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setLocation(null)}
-                  disabled={busy}
-                >
-                  Remove location
-                </Button>
-              </div>
-            ) : (
-              <div className="jv-capture__actions">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => void addLocation()}
-                  disabled={busy || locating}
-                >
-                  <MapPin aria-hidden="true" size={15} />
-                  {locating ? "Finding location…" : "Add my location"}
-                </Button>
-              </div>
-            )}
+            <LocationField
+              value={location}
+              onChange={setLocation}
+              disabled={busy}
+            />
           </div>
         </div>
       </AppAdaptiveDialog>

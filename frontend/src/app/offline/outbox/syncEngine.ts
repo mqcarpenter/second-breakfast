@@ -6,7 +6,7 @@ import {
 } from "../../../features/editor/mediaUpload";
 import { OutboxStorageError, outboxRepository } from "./outboxRepository";
 import { isDue } from "./stateMachine";
-import type { OutboxItem } from "./types";
+import type { OutboxItem, OutboxPlace } from "./types";
 
 /**
  * Replays queued entries to the server (docs/features/pwa.md, "Offline capture
@@ -28,6 +28,12 @@ export type SyncDeps = {
   ensureSession: () => Promise<boolean>;
   createMoment: (body: MomentCreate) => Promise<{ id: string }>;
   uploadFile: (file: File, momentId: string) => Promise<{ id: string }>;
+  /** Best-effort: names a GPS-only capture once the server is reachable. A
+   *  failure or a null result just leaves the entry with coordinates. */
+  resolvePlace?: (
+    latitude: number,
+    longitude: number,
+  ) => Promise<OutboxPlace | null>;
   now?: () => Date;
 };
 
@@ -104,9 +110,20 @@ export function buildMomentBody(item: OutboxItem): MomentCreate {
     logged_at_utc: item.loggedAtUtc,
     logged_timezone: item.timezone,
   };
-  if (item.latitude !== null && item.longitude !== null) {
+  const hasCoordinates = item.latitude != null && item.longitude != null;
+  if (hasCoordinates) {
     body.latitude = item.latitude;
     body.longitude = item.longitude;
+  }
+  // `location_json` uses the backend's documented keys only; the reader labels
+  // an entry from name, locality, admin_area or country.
+  if (item.place?.name) {
+    body.location_json = {
+      ...item.place,
+      ...(hasCoordinates
+        ? { latitude: item.latitude, longitude: item.longitude }
+        : {}),
+    };
   }
   // Media-only captures become media-only Moments, like Quick Log.
   if (text) {
@@ -144,7 +161,24 @@ export function createSyncEngine(
     let activeFile: string | undefined;
     try {
       if (!current.momentId) {
-        const moment = await deps.createMoment(buildMomentBody(current));
+        let toCreate = current;
+        if (
+          !current.place &&
+          current.latitude != null &&
+          current.longitude != null &&
+          deps.resolvePlace
+        ) {
+          try {
+            const place = await deps.resolvePlace(
+              current.latitude,
+              current.longitude,
+            );
+            if (place) toCreate = { ...current, place };
+          } catch {
+            // Naming the place is a courtesy; coordinates alone are fine.
+          }
+        }
+        const moment = await deps.createMoment(buildMomentBody(toCreate));
         current = await repo.apply(
           id,
           { type: "momentCreated", momentId: moment.id },

@@ -1,5 +1,5 @@
 import "fake-indexeddb/auto";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "../../../api/client/errors";
 import type { MomentCreate } from "../../../api/generated/types.gen";
 import { MediaUploadError } from "../../../features/editor/mediaUpload";
@@ -431,6 +431,34 @@ describe("buildMomentBody", () => {
     expect(buildMomentBody(item({ text: "   " })).entry).toBeUndefined();
   });
 
+  it("sends a named place with its documented keys and coordinates", () => {
+    const body = buildMomentBody(
+      item({
+        latitude: 1,
+        longitude: 2,
+        place: { name: "Cafe", locality: "Town", country: "Land" },
+      }),
+    );
+    expect(body.location_json).toEqual({
+      name: "Cafe",
+      locality: "Town",
+      country: "Land",
+      latitude: 1,
+      longitude: 2,
+    });
+    expect(body).toMatchObject({ latitude: 1, longitude: 2 });
+  });
+
+  it("a typed name alone sends a label with no coordinates", () => {
+    const body = buildMomentBody(item({ place: { name: "Grandma's porch" } }));
+    expect(body.location_json).toEqual({ name: "Grandma's porch" });
+    expect(body).not.toHaveProperty("latitude");
+  });
+
+  it("copes with entries queued before places existed", () => {
+    expect(buildMomentBody(item({})).location_json).toBeUndefined();
+  });
+
   it("includes location only when both coordinates are present", () => {
     expect(buildMomentBody(item({ latitude: 1, longitude: 2 }))).toMatchObject({
       latitude: 1,
@@ -439,5 +467,79 @@ describe("buildMomentBody", () => {
     expect(buildMomentBody(item({ latitude: 1 }))).not.toHaveProperty(
       "latitude",
     );
+  });
+});
+
+describe("naming a GPS-only capture", () => {
+  const gps = (clientId: string) =>
+    outboxRepository.enqueue({
+      clientId,
+      userId: "u1",
+      journalId: "j1",
+      text: "here",
+      loggedAt: T0,
+      timezone: "UTC",
+      latitude: 10,
+      longitude: 20,
+      files: [],
+    });
+
+  it("looks the place up when the entry syncs and sends it with the entry", async () => {
+    const server = fakeServer();
+    await gps("a");
+    const sent: MomentCreate[] = [];
+    await createSyncEngine(
+      deps(server, {
+        resolvePlace: async () => ({ name: "Town Square", locality: "Town" }),
+        createMoment: async (body) => {
+          sent.push(body);
+          return server.createMoment(body);
+        },
+      }),
+    ).sync("u1");
+    expect(sent[0]?.location_json).toMatchObject({
+      name: "Town Square",
+      latitude: 10,
+      longitude: 20,
+    });
+  });
+
+  it("still syncs with coordinates alone when the lookup fails", async () => {
+    const server = fakeServer();
+    await gps("a");
+    const sent: MomentCreate[] = [];
+    const report = await createSyncEngine(
+      deps(server, {
+        resolvePlace: async () => {
+          throw new Error("geocoder down");
+        },
+        createMoment: async (body) => {
+          sent.push(body);
+          return server.createMoment(body);
+        },
+      }),
+    ).sync("u1");
+    expect(report.synced).toBe(1);
+    expect(sent[0]).toMatchObject({ latitude: 10, longitude: 20 });
+    expect(sent[0]?.location_json).toBeUndefined();
+  });
+
+  it("does not look up a place the user already named", async () => {
+    const server = fakeServer();
+    await outboxRepository.enqueue({
+      clientId: "n",
+      userId: "u1",
+      journalId: "j1",
+      text: "x",
+      loggedAt: T0,
+      timezone: "UTC",
+      latitude: 1,
+      longitude: 2,
+      place: { name: "Mine" },
+      files: [],
+    });
+    const resolvePlace = vi.fn();
+    await createSyncEngine(deps(server, { resolvePlace })).sync("u1");
+    expect(resolvePlace).not.toHaveBeenCalled();
   });
 });
