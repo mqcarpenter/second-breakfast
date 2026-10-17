@@ -1,7 +1,8 @@
-# second-breakfast deployment: Journiv (built from this repo) + Postgres + Valkey + Caddy.
+# second-breakfast deployment: Journiv (built from this repo) + Postgres + Valkey.
 # Run from this directory:  docker compose up -d --build
-# Isolated Compose project: its own network and container names, so it does not
-# collide with other stacks on the same host. Only Caddy publishes host ports.
+# Isolated Compose project with its own container names. No host ports are published:
+# the shared platform stack (Caddy + Ollama, a separate repo) proxies to sb-app over
+# the external `edge` network, so start that stack first.
 
 name: second-breakfast
 
@@ -76,7 +77,7 @@ services:
       args:
         REQUIRE_PLUS_FEATURES: "false"
     container_name: sb-app
-    # No host port is published. Caddy reaches this over the proxy network.
+    # No host port is published. The platform Caddy reaches sb-app over `edge`.
     environment:
       <<: *base-env
       SERVICE_ROLE: app
@@ -84,7 +85,7 @@ services:
       RATE_LIMIT_STORAGE_URI: redis://valkey:6379/1
     networks:
       - backend
-      - proxy
+      - edge
     healthcheck:
       interval: 30s
       timeout: 10s
@@ -141,26 +142,8 @@ services:
     healthcheck:
       disable: true
 
-  caddy:
-    image: caddy:2
-    container_name: sb-caddy
-    ports:
-      - "${CADDY_HTTPS_PORT:-443}:443"
-      - "${CADDY_HTTP_PORT:-80}:80"
-    environment:
-      JOURNAL_HOST: ${JOURNAL_HOST:?set JOURNAL_HOST in deploy/.env}
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - ./caddy/data:/data
-      - ./caddy/config:/config
-    depends_on:
-      - app
-    networks:
-      - proxy
-    restart: unless-stopped
-
 networks:
   backend:
     driver: bridge
-  proxy:
-    driver: bridge
+  edge:
+    external: true

@@ -1,7 +1,10 @@
-# Deploy: Compose + Caddy (LAN only)
+# Deploy: Compose (LAN only)
 
-Journiv, Postgres, Valkey and Caddy as an isolated Compose project (`second-breakfast`).
-Only Caddy publishes host ports (443, and 80 for the CA root download). Journiv's port 8000 is not published.
+Journiv, Postgres and Valkey as an isolated Compose project (`second-breakfast`). No host ports are published.
+
+Caddy (TLS and the reverse proxy) and Ollama live in a separate, shared **platform** stack that fronts every
+app on this host. That stack creates the external `edge` network that `sb-app` joins, so it must be running
+before this one starts. The journal's site block (`sites/journal.caddy`, proxying to `sb-app:8000`) lives there.
 
 ## First run (on the server)
 
@@ -10,7 +13,7 @@ Only Caddy publishes host ports (443, and 80 for the CA root download). Journiv'
 3. Generate secrets without printing them:
    `umask 077; { echo "SECRET_KEY=$(openssl rand -base64 32)"; echo "POSTGRES_PASSWORD=$(openssl rand -hex 24)"; } >> .env`
    Remove the empty `SECRET_KEY=` and `POSTGRES_PASSWORD=` lines from the example first.
-4. Check ports 80 and 443 are free: `sudo ss -ltnp | grep -E ':(80|443)\b'`.
+4. Make sure the platform stack is up: `docker network inspect edge >/dev/null && echo ok`.
 5. Give the Journiv containers (uid 1000) write access before the first start, otherwise they crash-loop with
    `mkdir: cannot create directory '/data/logs': Permission denied`:
    `mkdir -p data/logs && sudo chown 1000:1000 data && sudo chown -R 1000:1000 data/logs`
@@ -33,7 +36,8 @@ static or reserved LAN IP.
 
 ## Trusting the certificate (once per device)
 
-Caddy signs with its own private CA. Download `http://<name>.local/root.crt`, then on iPhone:
+Caddy signs with its own private CA. The CA belongs to the platform stack, so one trusted root covers every app.
+Download `http://<name>.local/root.crt`, then on iPhone:
 Settings > Profile Downloaded > Install, then Settings > General > About > Certificate Trust Settings > **turn the toggle on**.
 Installing the profile alone is not enough: until the toggle is on, HTTPS just spins in Safari.
 If the name does not resolve at home, turn off Private Relay and Limit IP Address Tracking for that Wi-Fi network.
@@ -44,6 +48,6 @@ Set `DISABLE_SIGNUP=true` in `.env` and run `docker compose up -d`.
 
 ## Checks
 
-- `curl -kI https://<name>.local` returns 200 through Caddy.
+- `curl -kI https://<name>.local` returns 200 through the platform Caddy.
 - `curl -s https://<name>.local/api/v1/health`
 - Port 8000 is not reachable from the LAN.
